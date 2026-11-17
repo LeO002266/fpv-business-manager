@@ -1,51 +1,98 @@
-# FPV Business Manager
+# FPV Business Manager — Full-Stack Enterprise ERP
 
-A browser-based FPV drone business management prototype for managing clients, shoots, invoices, payments, travel costs, equipment and reports.
+A complete, production-grade Business Management ERP and CRM tailored for FPV drone videography, aerial photography, commercial production, and event shooting businesses.
 
-## Included in this build
+---
 
-- Dashboard for invoiced revenue, cash received, pending receivables, expenses and travel expenses.
-- Client CRM with client-wise billing, collections, outstanding balance and linked expenses.
-- Project and shoot booking register.
-- Travel and expense register: petrol, diesel, toll, parking, hotel, food, tickets, local transport and other costs.
-- Expense billing treatment: Client Billable or Business Expense.
-- Invoice generation that can automatically attach unbilled client-billable expenses for the selected client/project.
-- Invoice print / Save as PDF, tax, discount, partial payments and payment ledger.
-- Multiple currencies (INR, USD, AED, EUR, GBP, CAD, AUD, SGD, JPY) with a manually entered exchange rate saved on each expense/invoice.
-- Drone and equipment inventory, team directory, client-wise reports, JSON backup/restore and CSV expense export.
-- Responsive layout for desktop and mobile.
+## 🚀 Key Highlights & Capabilities
 
-## Run it
+- **Executive Financial Dashboard**: Real-time KPIs for Invoiced Revenue, Cash Received, Pending Receivables, Travel Expenses, and Net Operating Profit with interactive Recharts trends and date filtering (Today, This Month, This Year, All Time).
+- **Client CRM with 9-Tab Profile**: Dedicated client financial dashboard featuring 9 tabs:
+  1. *Overview & Financials* (Billed, Received, Pending, Net Profit, Margin %)
+  2. *Projects* (Shoot histories & booking statuses)
+  3. *Quotations* (Proposals & validity dates)
+  4. *Invoices* (Issued tax invoices & payment status)
+  5. *Payments* (Receipt history & transaction IDs)
+  6. *Travel Expenses* (Routes, fuel, toll, hotel)
+  7. *Other Expenses* (Direct project costs)
+  8. *Documents & Notes* (Briefs & contracts)
+  9. *Activity History* (Audit transaction timeline)
+- **Shoot & Booking Management**: Track project locations (Rajnagar, Durg, Bhilai, Raipur, national, international), shoot timelines, crew assignments with daily/project rates, equipment allocations, and project-level P&L.
+- **Quotations Engine with 1-Click Conversion**: Itemized service proposals that convert into a Confirmed Project and Tax Invoice with a single click without creating duplicate records.
+- **Invoicing & Vector PDF Generation**: Professional downloadable PDF invoices featuring business branding, GSTIN, client tax info, itemized services, unbilled travel reimbursement auto-inclusion, and UPI/Bank QR payment details.
+- **Advanced Travel & Fuel Logistics Engine**:
+  - Distance-based automatic fuel formula: `Estimated Cost = (Distance ÷ Vehicle Mileage) × Fuel Price`.
+  - Vehicle presets (Hero Xpulse 35 km/l, Maruti Swift 20 km/l, Mahindra Thar 12 km/l).
+  - Strict **Client Billable** vs **Business Expense** classification with invoice allocation locking to prevent duplicate billing.
+- **Drone Fleet & Equipment Inventory**: Asset tags, condition monitoring (New, Good, Fair, Needs Repair), purchase valuations, and repair service histories.
+- **Crew & Pilot Management**: Directory of FPV pilots, camera operators, editors, and spotters with per-day/per-project pay rates tied into shoot profitability.
+- **Analytical Reports & CSV Export**: Downloadable Profit & Loss Statements, Client Profitability Rankings, Project Margin Audits, and Vehicle Fuel Reports.
+- **Multi-Currency Support**: Base currency INR (₹), with support for USD ($), AED (AED), EUR (€), GBP (£) with historical transaction-time exchange rate freezing.
+- **Supabase PostgreSQL & Dual Mode**: Fully migrated and live on Supabase PostgreSQL with local SQLite fallback for instant zero-config offline development.
 
-1. Open index.html in a modern browser, or enable GitHub Pages for this repository.
-2. Add clients and projects.
-3. Record expenses and select whether each expense is client-billable or an internal business expense.
-4. Create an invoice for a client/project. Choose to automatically include unbilled client-billable expenses.
-5. Record payments against invoices. Use the invoice Print / PDF action to save a client copy.
+---
 
-## Important prototype limitations
+## 🛠️ Technology Stack
 
-This is currently a front-end prototype. Data is saved in the current browser using localStorage. It is not yet a production multi-user accounting system.
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React icons, Recharts, jsPDF, jspdf-autotable.
+- **Backend**: Node.js, Express, TypeScript, `@supabase/supabase-js`, `pg` (node-postgres), `node:sqlite`.
+- **Database**: Supabase PostgreSQL (`fugvtirkxegibrsdgkpg`) + local SQLite dual adapter.
+- **Security**: JWT authentication, bcrypt password hashing, environment secret isolation.
 
-- No cloud database, secure login, role-based permissions or cross-device sync.
-- Fuel estimate is available for petrol/diesel when you enter route distance, vehicle mileage and fuel price. Entering an actual amount overrides the estimate. Distance and fuel price are manual in this prototype; live Maps distance and fuel-price APIs are future integrations. Exchange rates are also entered manually.
-- No automatic WhatsApp/SMS/email sending or server-side reminders.
-- Receipt field currently stores a reference/URL text; secure file upload storage is not connected.
-- Tax/invoice output is a configurable management template, not a jurisdiction-specific tax-compliance engine. Have a qualified accountant verify tax settings and invoice requirements.
-- Keep regular JSON backups. Clearing browser data can erase locally stored records.
+---
 
-## Recommended production architecture
+## 📦 Getting Started
 
-- Frontend: React / Next.js PWA.
-- Backend and authentication: Node.js API + PostgreSQL (or Supabase).
-- Storage: private object storage for receipts and invoice PDFs.
-- Integrations: Maps/Routes API for distance, a trusted FX-rate provider, WhatsApp Business provider, email/SMS provider.
-- Deployment: HTTPS hosting, scheduled jobs, automated backups, audit logs and role-based access.
+### 1. Install Dependencies
+```bash
+npm install
+```
 
-## Currency handling
+### 2. Environment Configuration
+Create a `.env` file in the root folder (see `.env.example`):
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=fpv-jwt-secret-key-super-secure-2026
 
-Each foreign-currency expense stores its exchange rate as base-currency units per one unit of transaction currency. The invoice has its own rate using the same convention. For example, if the base currency is INR and 1 USD = INR 83.50, enter 83.50 for USD. Base-currency transactions use 1. Rates are manual in this prototype and should be recorded consistently.
+# Supabase PostgreSQL Configuration
+SUPABASE_URL=https://fugvtirkxegibrsdgkpg.supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-## Repository
+# Optional direct PostgreSQL connection:
+# DATABASE_URL=postgresql://postgres:your_password@db.fugvtirkxegibrsdgkpg.supabase.co:5432/postgres
+```
 
-https://github.com/LeO002266/fpv-business-manager
+### 3. Run in Development Mode
+Starts both the Express API backend and the Vite frontend concurrently with hot-reloading:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Build & Run in Production Mode
+```bash
+npm run build
+npm start
+```
+Open [http://localhost:5000](http://localhost:5000) in your browser.
+
+---
+
+## 🗄️ Database Migrations (Supabase)
+
+To push schema changes or seed data to your linked remote Supabase project:
+```bash
+# Push schema migration
+npx supabase db push --remote --yes
+
+# Push seed records
+npx supabase db push --remote --include-seed --yes
+```
+
+---
+
+## 📄 License
+
+Proprietary — FPV Business Manager ERP. All rights reserved.
