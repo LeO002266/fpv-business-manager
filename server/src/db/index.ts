@@ -1,7 +1,6 @@
-import { initDatabase, DB_PATH } from './schema.js';
-import { seedDatabase } from './seed.js';
-
-export const db = initDatabase();
-seedDatabase(db);
-
-export * from './schema.js';
+/**
+ * Database index — re-exports the unified adapter.
+ * Routes import { getAdapter } from '../db/index.js' and await it per-request.
+ */
+export { createAdapter, getAdapter } from './adapter.js';
+export type { DbAdapter } from './adapter.js';

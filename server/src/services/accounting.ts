@@ -1,4 +1,9 @@
-import { DatabaseSync } from 'node:sqlite';
+/**
+ * AccountingService — async version compatible with both SQLite and PostgreSQL.
+ * All methods are now async and use the DbAdapter interface.
+ */
+
+import type { DbAdapter } from '../db/adapter.js';
 
 export interface ClientFinancials {
   clientId: string;
@@ -36,43 +41,45 @@ export interface ProjectFinancials {
 }
 
 export class AccountingService {
-  constructor(private db: DatabaseSync) {}
+  constructor(private db: DbAdapter) {}
 
-  getClientFinancials(clientId: string): ClientFinancials {
-    const invRow = this.db.prepare(`
-      SELECT 
-        COALESCE(SUM(total_amount * exchange_rate), 0) as total_billed,
-        COALESCE(SUM(amount_paid * exchange_rate), 0) as total_received,
-        COALESCE(SUM(balance_due * exchange_rate), 0) as pending_receivables
-      FROM invoices 
-      WHERE client_id = ? AND status != 'Cancelled'
-    `).get(clientId) as any;
+  async getClientFinancials(clientId: string): Promise<ClientFinancials> {
+    const [invRow, expRow, teamRow, projCounts] = await Promise.all([
+      this.db.queryOne<any>(`
+        SELECT
+          COALESCE(SUM(total_amount * exchange_rate), 0) as total_billed,
+          COALESCE(SUM(amount_paid * exchange_rate), 0) as total_received,
+          COALESCE(SUM(balance_due * exchange_rate), 0) as pending_receivables
+        FROM invoices
+        WHERE client_id = $1 AND status != 'Cancelled'
+      `, [clientId]),
 
-    const expRow = this.db.prepare(`
-      SELECT 
-        COALESCE(SUM(CASE WHEN expense_type = 'Travel' THEN base_amount ELSE 0 END), 0) as travel_expenses,
-        COALESCE(SUM(CASE WHEN expense_type != 'Travel' THEN base_amount ELSE 0 END), 0) as other_expenses,
-        COALESCE(SUM(CASE WHEN billing_treatment = 'Client_Billable' THEN base_amount ELSE 0 END), 0) as billable_expenses,
-        COALESCE(SUM(CASE WHEN billing_treatment = 'Business_Expense' THEN base_amount ELSE 0 END), 0) as non_billable_expenses
-      FROM expenses
-      WHERE client_id = ?
-    `).get(clientId) as any;
+      this.db.queryOne<any>(`
+        SELECT
+          COALESCE(SUM(CASE WHEN expense_type = 'Travel' THEN base_amount ELSE 0 END), 0) as travel_expenses,
+          COALESCE(SUM(CASE WHEN expense_type != 'Travel' THEN base_amount ELSE 0 END), 0) as other_expenses,
+          COALESCE(SUM(CASE WHEN billing_treatment = 'Client_Billable' THEN base_amount ELSE 0 END), 0) as billable_expenses,
+          COALESCE(SUM(CASE WHEN billing_treatment = 'Business_Expense' THEN base_amount ELSE 0 END), 0) as non_billable_expenses
+        FROM expenses
+        WHERE client_id = $1
+      `, [clientId]),
 
-    const teamRow = this.db.prepare(`
-      SELECT COALESCE(SUM(pm.agreed_rate), 0) as team_costs
-      FROM project_members pm
-      JOIN projects p ON pm.project_id = p.id
-      WHERE p.client_id = ?
-    `).get(clientId) as any;
+      this.db.queryOne<any>(`
+        SELECT COALESCE(SUM(pm.agreed_rate), 0) as team_costs
+        FROM project_members pm
+        JOIN projects p ON pm.project_id = p.id
+        WHERE p.client_id = $1
+      `, [clientId]),
 
-    const projCounts = this.db.prepare(`
-      SELECT 
-        COUNT(*) as total_projects,
-        COUNT(CASE WHEN status = 'Completed' THEN 1 END) as completed_projects,
-        COUNT(CASE WHEN status IN ('Confirmed', 'Scheduled', 'In Progress') THEN 1 END) as ongoing_projects
-      FROM projects
-      WHERE client_id = ?
-    `).get(clientId) as any;
+      this.db.queryOne<any>(`
+        SELECT
+          COUNT(*) as total_projects,
+          COUNT(CASE WHEN status = 'Completed' THEN 1 END) as completed_projects,
+          COUNT(CASE WHEN status IN ('Confirmed', 'Scheduled', 'In Progress') THEN 1 END) as ongoing_projects
+        FROM projects
+        WHERE client_id = $1
+      `, [clientId]),
+    ]);
 
     const totalBilled = Number(invRow?.total_billed || 0);
     const totalReceived = Number(invRow?.total_received || 0);
@@ -83,9 +90,6 @@ export class AccountingService {
     const nonBillableExpenses = Number(expRow?.non_billable_expenses || 0);
     const teamCosts = Number(teamRow?.team_costs || 0);
 
-    // Accounting rule from brief:
-    // Billable expenses are recovered from client via invoice.
-    // Business expenses and team costs reduce actual profit.
     const totalCost = nonBillableExpenses + teamCosts;
     const netProfit = totalBilled - totalCost;
     const profitMarginPercent = totalBilled > 0 ? (netProfit / totalBilled) * 100 : 0;
@@ -103,43 +107,55 @@ export class AccountingService {
       totalCost: Math.round(totalCost * 100) / 100,
       netProfit: Math.round(netProfit * 100) / 100,
       profitMarginPercent: Math.round(profitMarginPercent * 10) / 10,
-      totalProjects: projCounts?.total_projects || 0,
-      completedProjects: projCounts?.completed_projects || 0,
-      ongoingProjects: projCounts?.ongoing_projects || 0
+      totalProjects: Number(projCounts?.total_projects || 0),
+      completedProjects: Number(projCounts?.completed_projects || 0),
+      ongoingProjects: Number(projCounts?.ongoing_projects || 0),
     };
   }
 
-  getProjectFinancials(projectId: string): ProjectFinancials {
-    const proj = this.db.prepare('SELECT agreed_amount, currency FROM projects WHERE id = ?').get(projectId) as any;
+  async getProjectFinancials(projectId: string): Promise<ProjectFinancials> {
+    const proj = await this.db.queryOne<any>(
+      'SELECT agreed_amount, currency FROM projects WHERE id = $1',
+      [projectId]
+    );
     const agreedAmount = Number(proj?.agreed_amount || 0);
 
-    const invRow = this.db.prepare(`
-      SELECT 
-        COALESCE(SUM(total_amount), 0) as invoiced_amount,
-        COALESCE(SUM(amount_paid), 0) as received_amount,
-        COALESCE(SUM(balance_due), 0) as pending_amount
-      FROM invoices 
-      WHERE project_id = ? AND status != 'Cancelled'
-    `).get(projectId) as any;
+    const [invRow, payRow, expRow, teamRow] = await Promise.all([
+      this.db.queryOne<any>(`
+        SELECT
+          COALESCE(SUM(total_amount), 0) as invoiced_amount,
+          COALESCE(SUM(amount_paid), 0) as received_amount,
+          COALESCE(SUM(balance_due), 0) as pending_amount
+        FROM invoices
+        WHERE project_id = $1 AND status != 'Cancelled'
+      `, [projectId]),
 
-    const expRow = this.db.prepare(`
-      SELECT 
-        COALESCE(SUM(CASE WHEN expense_type = 'Travel' THEN amount ELSE 0 END), 0) as travel_expenses,
-        COALESCE(SUM(CASE WHEN expense_type != 'Travel' THEN amount ELSE 0 END), 0) as other_expenses,
-        COALESCE(SUM(CASE WHEN billing_treatment = 'Client_Billable' THEN amount ELSE 0 END), 0) as billable_expenses,
-        COALESCE(SUM(CASE WHEN billing_treatment = 'Business_Expense' THEN amount ELSE 0 END), 0) as non_billable_expenses
-      FROM expenses
-      WHERE project_id = ?
-    `).get(projectId) as any;
+      this.db.queryOne<any>(`
+        SELECT COALESCE(SUM(pa.amount_allocated), 0) as actual_received
+        FROM payment_allocations pa
+        JOIN invoices i ON pa.invoice_id = i.id
+        WHERE i.project_id = $1
+      `, [projectId]),
 
-    const teamRow = this.db.prepare(`
-      SELECT COALESCE(SUM(agreed_rate), 0) as team_costs
-      FROM project_members
-      WHERE project_id = ?
-    `).get(projectId) as any;
+      this.db.queryOne<any>(`
+        SELECT
+          COALESCE(SUM(CASE WHEN expense_type = 'Travel' THEN base_amount ELSE 0 END), 0) as travel_expenses,
+          COALESCE(SUM(CASE WHEN expense_type != 'Travel' THEN base_amount ELSE 0 END), 0) as other_expenses,
+          COALESCE(SUM(CASE WHEN billing_treatment = 'Client_Billable' THEN base_amount ELSE 0 END), 0) as billable_expenses,
+          COALESCE(SUM(CASE WHEN billing_treatment != 'Client_Billable' THEN base_amount ELSE 0 END), 0) as non_billable_expenses
+        FROM expenses
+        WHERE project_id = $1
+      `, [projectId]),
+
+      this.db.queryOne<any>(`
+        SELECT COALESCE(SUM(agreed_rate), 0) as team_costs
+        FROM project_members
+        WHERE project_id = $1
+      `, [projectId]),
+    ]);
 
     const invoicedAmount = Number(invRow?.invoiced_amount || 0);
-    const receivedAmount = Number(invRow?.received_amount || 0);
+    const receivedAmount = Number(payRow?.actual_received || invRow?.received_amount || 0);
     const pendingAmount = Number(invRow?.pending_amount || 0);
     const travelExpenses = Number(expRow?.travel_expenses || 0);
     const otherExpenses = Number(expRow?.other_expenses || 0);
@@ -147,12 +163,10 @@ export class AccountingService {
     const nonBillableExpenses = Number(expRow?.non_billable_expenses || 0);
     const teamCosts = Number(teamRow?.team_costs || 0);
 
-    // Internal costs borne by business
     const totalCost = nonBillableExpenses + teamCosts;
-    const effectiveRevenue = invoicedAmount > 0 ? invoicedAmount : agreedAmount;
-    const grossProfit = agreedAmount - totalCost;
-    const netProfit = effectiveRevenue - totalCost;
-    const profitMarginPercent = effectiveRevenue > 0 ? (netProfit / effectiveRevenue) * 100 : 0;
+    const grossProfit = invoicedAmount - totalCost;
+    const netProfit = agreedAmount - totalCost;
+    const profitMarginPercent = agreedAmount > 0 ? (netProfit / agreedAmount) * 100 : 0;
 
     return {
       projectId,
@@ -168,70 +182,75 @@ export class AccountingService {
       totalCost: Math.round(totalCost * 100) / 100,
       grossProfit: Math.round(grossProfit * 100) / 100,
       netProfit: Math.round(netProfit * 100) / 100,
-      profitMarginPercent: Math.round(profitMarginPercent * 10) / 10
+      profitMarginPercent: Math.round(profitMarginPercent * 10) / 10,
     };
   }
 
-  getExecutiveDashboard(orgId: string, startDate?: string, endDate?: string) {
-    let dateFilterInv = "";
-    let dateFilterExp = "";
-    let dateFilterPay = "";
-    const paramsInv: any[] = [orgId];
-    const paramsExp: any[] = [orgId];
-    const paramsPay: any[] = [orgId];
+  async getDashboardStats(orgId: string, startDate?: string, endDate?: string): Promise<any> {
+    const db = this.db;
+    const isPg = db.isPg;
+
+    // Build date params
+    let dateFilterInv = '';
+    let dateFilterExp = '';
+    const paramsInvBase = [orgId];
+    const paramsExpBase = [orgId];
 
     if (startDate && endDate) {
-      dateFilterInv = " AND issue_date BETWEEN ? AND ?";
-      dateFilterExp = " AND expense_date BETWEEN ? AND ?";
-      dateFilterPay = " AND payment_date BETWEEN ? AND ?";
-      paramsInv.push(startDate, endDate);
-      paramsExp.push(startDate, endDate);
-      paramsPay.push(startDate, endDate);
+      dateFilterInv = isPg ? ` AND issue_date BETWEEN $2 AND $3` : ` AND issue_date BETWEEN ? AND ?`;
+      dateFilterExp = isPg ? ` AND expense_date BETWEEN $2 AND $3` : ` AND expense_date BETWEEN ? AND ?`;
+      paramsInvBase.push(startDate, endDate);
+      paramsExpBase.push(startDate, endDate);
     }
 
-    const inv = this.db.prepare(`
-      SELECT 
-        COALESCE(SUM(total_amount * exchange_rate), 0) as total_invoiced,
-        COALESCE(SUM(amount_paid * exchange_rate), 0) as total_paid_on_invoices,
-        COALESCE(SUM(balance_due * exchange_rate), 0) as pending_receivables
-      FROM invoices 
-      WHERE organization_id = ? AND status != 'Cancelled' ${dateFilterInv}
-    `).get(...paramsInv) as any;
+    const ph = (n: number) => isPg ? `$${n}` : '?';
 
-    const pay = this.db.prepare(`
-      SELECT COALESCE(SUM(base_amount), 0) as total_cash_received
-      FROM payments 
-      WHERE organization_id = ? ${dateFilterPay}
-    `).get(...paramsPay) as any;
+    const [inv, pay, exp, team, counts] = await Promise.all([
+      db.queryOne<any>(`
+        SELECT
+          COALESCE(SUM(total_amount * exchange_rate), 0) as total_invoiced,
+          COALESCE(SUM(amount_paid * exchange_rate), 0) as total_received,
+          COALESCE(SUM(balance_due * exchange_rate), 0) as pending_receivables,
+          COALESCE(SUM(CASE WHEN status IN ('Unpaid','Partially Paid','Overdue') THEN total_amount * exchange_rate ELSE 0 END), 0) as outstanding
+        FROM invoices
+        WHERE organization_id = ${ph(1)} AND status != 'Cancelled' ${dateFilterInv}
+      `, paramsInvBase),
 
-    const exp = this.db.prepare(`
-      SELECT 
-        COALESCE(SUM(base_amount), 0) as total_expenses,
-        COALESCE(SUM(CASE WHEN expense_type = 'Travel' THEN base_amount ELSE 0 END), 0) as travel_expenses,
-        COALESCE(SUM(CASE WHEN expense_type != 'Travel' THEN base_amount ELSE 0 END), 0) as project_expenses,
-        COALESCE(SUM(CASE WHEN billing_treatment = 'Business_Expense' THEN base_amount ELSE 0 END), 0) as overhead_expenses,
-        COALESCE(SUM(CASE WHEN billing_treatment = 'Client_Billable' THEN base_amount ELSE 0 END), 0) as billable_expenses
-      FROM expenses
-      WHERE organization_id = ? ${dateFilterExp}
-    `).get(...paramsExp) as any;
+      db.queryOne<any>(`
+        SELECT COALESCE(SUM(base_amount), 0) as total_cash_received
+        FROM payments
+        WHERE organization_id = ${ph(1)} ${dateFilterInv.replace(/issue_date/g, 'payment_date')}
+      `, paramsInvBase),
 
-    const team = this.db.prepare(`
-      SELECT COALESCE(SUM(pm.agreed_rate), 0) as team_costs
-      FROM project_members pm
-      JOIN projects p ON pm.project_id = p.id
-      WHERE p.organization_id = ?
-    `).get(orgId) as any;
+      db.queryOne<any>(`
+        SELECT
+          COALESCE(SUM(base_amount), 0) as total_expenses,
+          COALESCE(SUM(CASE WHEN expense_type = 'Travel' THEN base_amount ELSE 0 END), 0) as travel_expenses,
+          COALESCE(SUM(CASE WHEN expense_type = 'Project_Direct' THEN base_amount ELSE 0 END), 0) as project_expenses,
+          COALESCE(SUM(CASE WHEN expense_type = 'General_Business' THEN base_amount ELSE 0 END), 0) as overhead_expenses,
+          COALESCE(SUM(CASE WHEN billing_treatment = 'Client_Billable' THEN base_amount ELSE 0 END), 0) as billable_expenses
+        FROM expenses
+        WHERE organization_id = ${ph(1)} ${dateFilterExp}
+      `, paramsExpBase),
 
-    const counts = this.db.prepare(`
-      SELECT 
-        (SELECT COUNT(*) FROM clients WHERE organization_id = ?) as total_clients,
-        (SELECT COUNT(*) FROM clients WHERE organization_id = ? AND status = 'Active') as active_clients,
-        (SELECT COUNT(*) FROM projects WHERE organization_id = ?) as total_projects,
-        (SELECT COUNT(*) FROM projects WHERE organization_id = ? AND status IN ('Confirmed', 'Scheduled', 'In Progress')) as ongoing_projects,
-        (SELECT COUNT(*) FROM projects WHERE organization_id = ? AND status = 'Completed') as completed_projects,
-        (SELECT COUNT(*) FROM invoices WHERE organization_id = ? AND status IN ('Unpaid', 'Partially Paid', 'Overdue')) as unpaid_invoices,
-        (SELECT COUNT(*) FROM quotations WHERE organization_id = ? AND status = 'Sent') as pending_quotations
-    `).get(orgId, orgId, orgId, orgId, orgId, orgId, orgId) as any;
+      db.queryOne<any>(`
+        SELECT COALESCE(SUM(pm.agreed_rate), 0) as team_costs
+        FROM project_members pm
+        JOIN projects p ON pm.project_id = p.id
+        WHERE p.organization_id = ${ph(1)}
+      `, [orgId]),
+
+      db.queryOne<any>(`
+        SELECT
+          (SELECT COUNT(*) FROM clients WHERE organization_id = ${ph(1)}) as total_clients,
+          (SELECT COUNT(*) FROM clients WHERE organization_id = ${ph(2)} AND status = 'Active') as active_clients,
+          (SELECT COUNT(*) FROM projects WHERE organization_id = ${ph(3)}) as total_projects,
+          (SELECT COUNT(*) FROM projects WHERE organization_id = ${ph(4)} AND status IN ('Confirmed', 'Scheduled', 'In Progress')) as ongoing_projects,
+          (SELECT COUNT(*) FROM projects WHERE organization_id = ${ph(5)} AND status = 'Completed') as completed_projects,
+          (SELECT COUNT(*) FROM invoices WHERE organization_id = ${ph(6)} AND status IN ('Unpaid', 'Partially Paid', 'Overdue')) as unpaid_invoices,
+          (SELECT COUNT(*) FROM quotations WHERE organization_id = ${ph(7)} AND status = 'Sent') as pending_quotations
+      `, [orgId, orgId, orgId, orgId, orgId, orgId, orgId]),
+    ]);
 
     const totalRevenue = Number(inv?.total_invoiced || 0);
     const totalReceived = Number(pay?.total_cash_received || 0);
@@ -242,49 +261,68 @@ export class AccountingService {
     const overheadExpenses = Number(exp?.overhead_expenses || 0);
     const billableExpenses = Number(exp?.billable_expenses || 0);
     const teamCosts = Number(team?.team_costs || 0);
-
-    // Business net profit = Revenue earned minus unbilled overhead/internal costs & team costs
     const netProfit = totalRevenue - overheadExpenses - teamCosts;
 
-    // Monthly breakdown for charts
-    const monthlyStats = this.db.prepare(`
-      WITH months AS (
-        SELECT strftime('%Y-%m', issue_date) as month, SUM(total_amount * exchange_rate) as revenue
-        FROM invoices WHERE organization_id = ? AND status != 'Cancelled'
-        GROUP BY strftime('%Y-%m', issue_date)
-      ),
-      exp_months AS (
-        SELECT strftime('%Y-%m', expense_date) as month, SUM(base_amount) as expenses
-        FROM expenses WHERE organization_id = ?
-        GROUP BY strftime('%Y-%m', expense_date)
-      )
-      SELECT 
-        COALESCE(m.month, e.month) as month,
-        COALESCE(m.revenue, 0) as revenue,
-        COALESCE(e.expenses, 0) as expenses
-      FROM months m
-      FULL OUTER JOIN exp_months e ON m.month = e.month
-      ORDER BY month DESC LIMIT 6
-    `).all(orgId, orgId) as any[];
+    // Monthly breakdown — last 6 months
+    const monthlyStats = await db.query<any>(
+      isPg
+        ? `
+          WITH months AS (
+            SELECT to_char(issue_date, 'YYYY-MM') as month, SUM(total_amount * exchange_rate) as revenue
+            FROM invoices WHERE organization_id = $1 AND status != 'Cancelled'
+            GROUP BY to_char(issue_date, 'YYYY-MM')
+          ),
+          exp_months AS (
+            SELECT to_char(expense_date, 'YYYY-MM') as month, SUM(base_amount) as expenses
+            FROM expenses WHERE organization_id = $2
+            GROUP BY to_char(expense_date, 'YYYY-MM')
+          )
+          SELECT
+            COALESCE(m.month, e.month) as month,
+            COALESCE(m.revenue, 0) as revenue,
+            COALESCE(e.expenses, 0) as expenses
+          FROM months m
+          FULL OUTER JOIN exp_months e ON m.month = e.month
+          ORDER BY month DESC LIMIT 6
+        `
+        : `
+          WITH months AS (
+            SELECT strftime('%Y-%m', issue_date) as month, SUM(total_amount * exchange_rate) as revenue
+            FROM invoices WHERE organization_id = ? AND status != 'Cancelled'
+            GROUP BY strftime('%Y-%m', issue_date)
+          ),
+          exp_months AS (
+            SELECT strftime('%Y-%m', expense_date) as month, SUM(base_amount) as expenses
+            FROM expenses WHERE organization_id = ?
+            GROUP BY strftime('%Y-%m', expense_date)
+          )
+          SELECT
+            COALESCE(m.month, e.month) as month,
+            COALESCE(m.revenue, 0) as revenue,
+            COALESCE(e.expenses, 0) as expenses
+          FROM months m
+          FULL OUTER JOIN exp_months e ON m.month = e.month
+          ORDER BY month DESC LIMIT 6
+        `,
+      [orgId, orgId]
+    );
 
-    // Expense category breakdown
-    const categoryBreakdown = this.db.prepare(`
-      SELECT category, SUM(base_amount) as total, COUNT(*) as count
-      FROM expenses
-      WHERE organization_id = ?
-      GROUP BY category
-      ORDER BY total DESC
-    `).all(orgId) as any[];
+    const categoryBreakdown = await db.query<any>(
+      `SELECT category, SUM(base_amount) as total, COUNT(*) as count
+       FROM expenses WHERE organization_id = ${isPg ? '$1' : '?'}
+       GROUP BY category ORDER BY total DESC`,
+      [orgId]
+    );
 
-    // Top clients
-    const topClients = this.db.prepare(`
-      SELECT c.id, c.name, COALESCE(SUM(i.total_amount * i.exchange_rate), 0) as revenue
-      FROM clients c
-      JOIN invoices i ON c.id = i.client_id
-      WHERE c.organization_id = ? AND i.status != 'Cancelled'
-      GROUP BY c.id
-      ORDER BY revenue DESC LIMIT 5
-    `).all(orgId) as any[];
+    const topClients = await db.query<any>(
+      `SELECT c.id, c.name, COALESCE(SUM(i.total_amount * i.exchange_rate), 0) as revenue
+       FROM clients c
+       JOIN invoices i ON c.id = i.client_id
+       WHERE c.organization_id = ${isPg ? '$1' : '?'} AND i.status != 'Cancelled'
+       GROUP BY c.id, c.name
+       ORDER BY revenue DESC LIMIT 5`,
+      [orgId]
+    );
 
     return {
       financials: {
@@ -298,25 +336,25 @@ export class AccountingService {
         billableExpenses: Math.round(billableExpenses * 100) / 100,
         teamCosts: Math.round(teamCosts * 100) / 100,
         netProfit: Math.round(netProfit * 100) / 100,
-        cashMargin: Math.round((totalReceived - totalExpenses) * 100) / 100
+        cashMargin: Math.round((totalReceived - totalExpenses) * 100) / 100,
       },
       counts,
-      monthlyStats: monthlyStats.map(m => ({
+      monthlyStats: [...monthlyStats].reverse().map((m) => ({
         month: m.month,
-        revenue: Math.round(m.revenue || 0),
-        expenses: Math.round(m.expenses || 0),
-        profit: Math.round((m.revenue || 0) - (m.expenses || 0))
-      })).reverse(),
-      categoryBreakdown: categoryBreakdown.map(c => ({
-        category: c.category,
-        total: Math.round(c.total || 0),
-        count: c.count
+        revenue: Math.round(Number(m.revenue) || 0),
+        expenses: Math.round(Number(m.expenses) || 0),
+        profit: Math.round((Number(m.revenue) || 0) - (Number(m.expenses) || 0)),
       })),
-      topClients: topClients.map(c => ({
+      categoryBreakdown: categoryBreakdown.map((c) => ({
+        category: c.category,
+        total: Math.round(Number(c.total) || 0),
+        count: Number(c.count),
+      })),
+      topClients: topClients.map((c) => ({
         id: c.id,
         name: c.name,
-        revenue: Math.round(c.revenue || 0)
-      }))
+        revenue: Math.round(Number(c.revenue) || 0),
+      })),
     };
   }
 }
