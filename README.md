@@ -1,22 +1,51 @@
-# FPV Business Manager — Starter Web App
+# FPV Business Manager
 
-## Run
-- Open `index.html` in a modern browser, or serve this folder with any static web server.
-- No build step or external dependency is required.
+A browser-based FPV drone business management prototype for managing clients, shoots, invoices, payments, travel costs, equipment and reports.
 
-## Included modules
-Dashboard, income/expense transactions, clients, projects/bookings, reminders, invoices/quotations with print-to-PDF, equipment inventory, reports, team directory, settings, JSON backup/restore, CSV export.
+## Included in this build
 
-## Important limitations of this starter
-- Records are stored in browser localStorage on the current device. This is a single-device prototype, not cloud-synced storage.
-- Login, multi-user access, server-side scheduled reminders, and WhatsApp/SMS/email delivery are not connected yet. Those require a backend, authentication, hosting, and provider credentials.
-- Financial figures are user-entered and should be verified before accounting or tax use.
-- This web app is responsive and can be prepared for Android packaging with Capacitor after the backend and mobile testing are completed.
+- Dashboard for invoiced revenue, cash received, pending receivables, expenses and travel expenses.
+- Client CRM with client-wise billing, collections, outstanding balance and linked expenses.
+- Project and shoot booking register.
+- Travel and expense register: petrol, diesel, toll, parking, hotel, food, tickets, local transport and other costs.
+- Expense billing treatment: Client Billable or Business Expense.
+- Invoice generation that can automatically attach unbilled client-billable expenses for the selected client/project.
+- Invoice print / Save as PDF, tax, discount, partial payments and payment ledger.
+- Multiple currencies (INR, USD, AED, EUR, GBP, CAD, AUD, SGD, JPY) with a manually entered exchange rate saved on each expense/invoice.
+- Drone and equipment inventory, team directory, client-wise reports, JSON backup/restore and CSV expense export.
+- Responsive layout for desktop and mobile.
 
-## Suggested production architecture
-Frontend: React/PWA or this UI migrated to React.
-Backend: Node.js API.
-Database: PostgreSQL/Supabase.
-Auth: Supabase Auth or equivalent.
-Reminder jobs: server scheduler + approved WhatsApp Business/SMS/email providers.
-Android: Capacitor wrapper around the hosted PWA.
+## Run it
+
+1. Open index.html in a modern browser, or enable GitHub Pages for this repository.
+2. Add clients and projects.
+3. Record expenses and select whether each expense is client-billable or an internal business expense.
+4. Create an invoice for a client/project. Choose to automatically include unbilled client-billable expenses.
+5. Record payments against invoices. Use the invoice Print / PDF action to save a client copy.
+
+## Important prototype limitations
+
+This is currently a front-end prototype. Data is saved in the current browser using localStorage. It is not yet a production multi-user accounting system.
+
+- No cloud database, secure login, role-based permissions or cross-device sync.
+- No live map distance, automatic fuel-price lookup or automatic exchange-rate API. Enter actual expenses and exchange rates manually; estimated mileage/fuel automation is a future integration.
+- No automatic WhatsApp/SMS/email sending or server-side reminders.
+- Receipt field currently stores a reference/URL text; secure file upload storage is not connected.
+- Tax/invoice output is a configurable management template, not a jurisdiction-specific tax-compliance engine. Have a qualified accountant verify tax settings and invoice requirements.
+- Keep regular JSON backups. Clearing browser data can erase locally stored records.
+
+## Recommended production architecture
+
+- Frontend: React / Next.js PWA.
+- Backend and authentication: Node.js API + PostgreSQL (or Supabase).
+- Storage: private object storage for receipts and invoice PDFs.
+- Integrations: Maps/Routes API for distance, a trusted FX-rate provider, WhatsApp Business provider, email/SMS provider.
+- Deployment: HTTPS hosting, scheduled jobs, automated backups, audit logs and role-based access.
+
+## Currency handling
+
+Each foreign-currency expense stores its exchange rate as base-currency units per one unit of transaction currency. The invoice has its own rate using the same convention. For example, if the base currency is INR and 1 USD = INR 83.50, enter 83.50 for USD. Base-currency transactions use 1. Rates are manual in this prototype and should be recorded consistently.
+
+## Repository
+
+https://github.com/LeO002266/fpv-business-manager
