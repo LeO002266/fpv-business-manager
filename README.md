@@ -28,7 +28,7 @@ A browser-based FPV drone business management prototype for managing clients, sh
 This is currently a front-end prototype. Data is saved in the current browser using localStorage. It is not yet a production multi-user accounting system.
 
 - No cloud database, secure login, role-based permissions or cross-device sync.
-- No live map distance, automatic fuel-price lookup or automatic exchange-rate API. Enter actual expenses and exchange rates manually; estimated mileage/fuel automation is a future integration.
+- Fuel estimate is available for petrol/diesel when you enter route distance, vehicle mileage and fuel price. Entering an actual amount overrides the estimate. Distance and fuel price are manual in this prototype; live Maps distance and fuel-price APIs are future integrations. Exchange rates are also entered manually.
 - No automatic WhatsApp/SMS/email sending or server-side reminders.
 - Receipt field currently stores a reference/URL text; secure file upload storage is not connected.
 - Tax/invoice output is a configurable management template, not a jurisdiction-specific tax-compliance engine. Have a qualified accountant verify tax settings and invoice requirements.
