@@ -1,57 +1,70 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getAdapter } from '../db/index.js';
 import crypto from 'node:crypto';
 
 export const remindersRouter = Router();
 
-remindersRouter.get('/', (req, res) => {
-  const orgId = req.user?.organizationId || 'org-fpv-default';
-  const { status } = req.query;
+remindersRouter.get('/', async (req, res) => {
+  try {
+    const db = getAdapter();
+    const orgId = req.user?.organizationId || 'org-fpv-default';
+    const { status } = req.query;
 
-  let query = 'SELECT * FROM reminders WHERE organization_id = ?';
-  const params: any[] = [orgId];
+    let query = 'SELECT * FROM reminders WHERE organization_id = $1';
+    const params: any[] = [orgId];
 
-  if (status) {
-    query += ' AND status = ?';
-    params.push(status);
-  }
+    if (status) {
+      query += ' AND status = $2';
+      params.push(status);
+    }
 
-  query += ' ORDER BY due_date ASC';
-  const reminders = db.prepare(query).all(...params);
-  res.json(reminders);
+    query += ' ORDER BY due_date ASC';
+    const reminders = await db.query(query, params);
+    res.json(reminders);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-remindersRouter.post('/', (req, res) => {
-  const orgId = req.user?.organizationId || 'org-fpv-default';
-  const { title, type, due_date, reference_type, reference_id, priority, notes } = req.body;
+remindersRouter.post('/', async (req, res) => {
+  try {
+    const db = getAdapter();
+    const orgId = req.user?.organizationId || 'org-fpv-default';
+    const { title, type, due_date, reference_type, reference_id, priority, notes } = req.body;
 
-  if (!title || !due_date) {
-    return res.status(400).json({ error: 'Title and due date are required' });
-  }
+    if (!title || !due_date) {
+      return res.status(400).json({ error: 'Title and due date are required' });
+    }
 
-  const id = 'rem-' + crypto.randomBytes(4).toString('hex');
-  db.prepare(`
-    INSERT INTO reminders (id, organization_id, title, type, due_date, reference_type, reference_id, priority, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    id, orgId, title, type || 'Shoot', due_date,
-    reference_type || 'Project', reference_id || null,
-    priority || 'Medium', notes || ''
-  );
+    const id = 'rem-' + crypto.randomBytes(4).toString('hex');
+    await db.execute(
+      `INSERT INTO reminders (id, organization_id, title, type, due_date, reference_type, reference_id, priority, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [id, orgId, title, type || 'Shoot', due_date,
+       reference_type || 'Project', reference_id || null,
+       priority || 'Medium', notes || '']
+    );
 
-  const created = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
-  res.status(201).json(created);
+    const created = await db.queryOne('SELECT * FROM reminders WHERE id = $1', [id]);
+    res.status(201).json(created);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-remindersRouter.put('/:id/status', (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  db.prepare("UPDATE reminders SET status = ?, updated_at = datetime('now') WHERE id = ?").run(status || 'Completed', id);
-  res.json({ success: true });
+remindersRouter.put('/:id/status', async (req, res) => {
+  try {
+    const db = getAdapter();
+    const { id } = req.params;
+    const { status } = req.body;
+    await db.execute(
+      "UPDATE reminders SET status = $1, updated_at = datetime('now') WHERE id = $2",
+      [status || 'Completed', id]
+    );
+    res.json({ success: true });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-remindersRouter.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  db.prepare('DELETE FROM reminders WHERE id = ?').run(id);
-  res.json({ success: true });
+remindersRouter.delete('/:id', async (req, res) => {
+  try {
+    const db = getAdapter();
+    await db.execute('DELETE FROM reminders WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });

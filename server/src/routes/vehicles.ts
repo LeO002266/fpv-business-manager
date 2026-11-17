@@ -1,55 +1,70 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getAdapter } from '../db/index.js';
 import crypto from 'node:crypto';
 
 export const vehiclesRouter = Router();
 
-vehiclesRouter.get('/', (req, res) => {
-  const orgId = req.user?.organizationId || 'org-fpv-default';
-  const vehicles = db.prepare('SELECT * FROM vehicles WHERE organization_id = ? ORDER BY name ASC').all(orgId);
-  res.json(vehicles);
+vehiclesRouter.get('/', async (req, res) => {
+  try {
+    const db = getAdapter();
+    const orgId = req.user?.organizationId || 'org-fpv-default';
+    const vehicles = await db.query('SELECT * FROM vehicles WHERE organization_id = $1 ORDER BY name ASC', [orgId]);
+    res.json(vehicles);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-vehiclesRouter.post('/', (req, res) => {
-  const orgId = req.user?.organizationId || 'org-fpv-default';
-  const { name, type, make_model, license_plate, fuel_type, mileage_km_per_liter } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: 'Vehicle name is required' });
-  }
+vehiclesRouter.post('/', async (req, res) => {
+  try {
+    const db = getAdapter();
+    const orgId = req.user?.organizationId || 'org-fpv-default';
+    const { name, type, make_model, license_plate, fuel_type, mileage_km_per_liter } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: 'Vehicle name is required' });
+    }
 
-  const id = 'veh-' + crypto.randomBytes(4).toString('hex');
-  db.prepare(`
-    INSERT INTO vehicles (id, organization_id, name, type, make_model, license_plate, fuel_type, mileage_km_per_liter)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, orgId, name, type || 'Car', make_model || '', license_plate || '', fuel_type || 'Petrol', Number(mileage_km_per_liter) || 20.0);
+    const id = 'veh-' + crypto.randomBytes(4).toString('hex');
+    await db.execute(
+      `INSERT INTO vehicles (id, organization_id, name, type, make_model, license_plate, fuel_type, mileage_km_per_liter)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [id, orgId, name, type || 'Car', make_model || '', license_plate || '', fuel_type || 'Petrol', Number(mileage_km_per_liter) || 20.0]
+    );
 
-  const created = db.prepare('SELECT * FROM vehicles WHERE id = ?').get(id);
-  res.status(201).json(created);
+    const created = await db.queryOne('SELECT * FROM vehicles WHERE id = $1', [id]);
+    res.status(201).json(created);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-vehiclesRouter.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const { name, type, make_model, license_plate, fuel_type, mileage_km_per_liter, is_active } = req.body;
+vehiclesRouter.put('/:id', async (req, res) => {
+  try {
+    const db = getAdapter();
+    const { id } = req.params;
+    const { name, type, make_model, license_plate, fuel_type, mileage_km_per_liter, is_active } = req.body;
 
-  db.prepare(`
-    UPDATE vehicles SET
-      name = COALESCE(?, name),
-      type = COALESCE(?, type),
-      make_model = COALESCE(?, make_model),
-      license_plate = COALESCE(?, license_plate),
-      fuel_type = COALESCE(?, fuel_type),
-      mileage_km_per_liter = COALESCE(?, mileage_km_per_liter),
-      is_active = COALESCE(?, is_active),
-      updated_at = datetime('now')
-    WHERE id = ?
-  `).run(name, type, make_model, license_plate, fuel_type, mileage_km_per_liter !== undefined ? Number(mileage_km_per_liter) : null, is_active, id);
+    await db.execute(
+      `UPDATE vehicles SET
+         name = COALESCE($1, name),
+         type = COALESCE($2, type),
+         make_model = COALESCE($3, make_model),
+         license_plate = COALESCE($4, license_plate),
+         fuel_type = COALESCE($5, fuel_type),
+         mileage_km_per_liter = COALESCE($6, mileage_km_per_liter),
+         is_active = COALESCE($7, is_active),
+         updated_at = datetime('now')
+       WHERE id = $8`,
+      [name, type, make_model, license_plate, fuel_type,
+       mileage_km_per_liter !== undefined ? Number(mileage_km_per_liter) : null,
+       is_active, id]
+    );
 
-  const updated = db.prepare('SELECT * FROM vehicles WHERE id = ?').get(id);
-  res.json(updated);
+    const updated = await db.queryOne('SELECT * FROM vehicles WHERE id = $1', [id]);
+    res.json(updated);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-vehiclesRouter.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  db.prepare('DELETE FROM vehicles WHERE id = ?').run(id);
-  res.json({ success: true });
+vehiclesRouter.delete('/:id', async (req, res) => {
+  try {
+    const db = getAdapter();
+    await db.execute('DELETE FROM vehicles WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
