@@ -155,7 +155,7 @@ export const PaymentsPage: React.FC = () => {
           description="No payment receipts match your search. Try a different receipt number, client, or UTR reference."
         />
       ) : (
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <THead>
@@ -171,10 +171,10 @@ export const PaymentsPage: React.FC = () => {
               <TBody>
                 {filteredPayments.map(p => (
                   <Tr key={p.id}>
-                    <Td className="px-4 font-mono font-bold text-white">{p.payment_number}</Td>
+                    <Td className="px-4 font-mono font-bold text-slate-900">{p.payment_number}</Td>
                     <Td className="px-4 text-slate-400 font-mono text-[11px]">{formatDate(p.payment_date)}</Td>
-                    <Td className="px-4 font-bold text-slate-200">{p.client_name}</Td>
-                    <Td className="px-4 font-mono text-slate-300">{p.invoice_number || 'Advance Token'}</Td>
+                    <Td className="px-4 font-bold text-slate-800">{p.client_name}</Td>
+                    <Td className="px-4 font-mono text-slate-700">{p.invoice_number || 'Advance Token'}</Td>
                     <Td className="px-4">
                       <span className="font-semibold text-emerald-400">{p.payment_method}</span>
                       {p.reference_number && (
@@ -279,7 +279,7 @@ export const PaymentsPage: React.FC = () => {
               />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>

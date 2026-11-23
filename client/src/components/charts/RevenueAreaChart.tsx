@@ -20,7 +20,7 @@ export interface MonthlyStat {
 }
 
 const LegendDot = ({ color, label }: { color: string; label: string }) => (
-  <span className="flex items-center gap-1.5 text-slate-400">
+  <span className="flex items-center gap-1.5 text-slate-600 font-medium">
     <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
     {label}
   </span>
@@ -30,7 +30,7 @@ export const RevenueAreaChart: React.FC<{ data: MonthlyStat[] }> = ({ data }) =>
   if (!data.length) {
     return (
       <div className="h-72 flex items-center justify-center">
-        <p className="text-xs text-slate-500">No monthly trend data yet</p>
+        <p className="text-sm text-slate-400">No monthly trend data recorded yet</p>
       </div>
     );
   }
@@ -38,15 +38,14 @@ export const RevenueAreaChart: React.FC<{ data: MonthlyStat[] }> = ({ data }) =>
   return (
     <div>
       {/* Custom legend */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] mb-3">
-        <LegendDot color={CHART_COLORS.revenue} label="Revenue" />
-        <LegendDot color={CHART_COLORS.expenses} label="Expenses" />
-        <span className="flex items-center gap-1.5 text-slate-400">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs mb-4">
+        <LegendDot color="#4f46e5" label="Revenue" />
+        <LegendDot color="#f43f5e" label="Expenses" />
+        <span className="flex items-center gap-1.5 text-slate-600 font-medium">
           <span
-            className="w-3 border-t-2 border-dashed"
-            style={{ borderColor: CHART_COLORS.profit }}
+            className="w-3 border-t-2 border-dashed border-emerald-500"
           />
-          Profit
+          Net Profit
         </span>
       </div>
 
@@ -55,67 +54,59 @@ export const RevenueAreaChart: React.FC<{ data: MonthlyStat[] }> = ({ data }) =>
           <ComposedChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <defs>
               <linearGradient id="revenueAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CHART_COLORS.revenue} stopOpacity={0.32} />
-                <stop offset="100%" stopColor={CHART_COLORS.revenue} stopOpacity={0} />
+                <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#4f46e5" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="expenseAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CHART_COLORS.expenses} stopOpacity={0.28} />
-                <stop offset="100%" stopColor={CHART_COLORS.expenses} stopOpacity={0} />
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
               </linearGradient>
             </defs>
 
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(148, 163, 184, 0.12)"
-              vertical={false}
-            />
+            <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" vertical={false} />
+
             <XAxis
               dataKey="month"
-              stroke="#64748b"
-              fontSize={11}
-              tickLine={false}
-              axisLine={false}
               tickFormatter={formatMonth}
+              stroke="#94a3b8"
+              tick={{ fill: '#64748b', fontSize: 11 }}
+              axisLine={{ stroke: '#e2e8f0' }}
+              tickLine={false}
             />
             <YAxis
-              stroke="#64748b"
-              fontSize={11}
-              tickLine={false}
-              axisLine={false}
               tickFormatter={formatCompact}
+              stroke="#94a3b8"
+              tick={{ fill: '#64748b', fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
             />
-            <Tooltip
-              content={<GlassTooltip />}
-              cursor={{ stroke: 'rgba(148, 163, 184, 0.25)', strokeDasharray: '4 4' }}
-            />
+
+            <Tooltip content={<GlassTooltip />} />
 
             <Area
               type="monotone"
               dataKey="revenue"
               name="Revenue"
-              stroke={CHART_COLORS.revenue}
+              stroke="#4f46e5"
               strokeWidth={2.5}
               fill="url(#revenueAreaGrad)"
-              animationDuration={900}
             />
             <Area
               type="monotone"
               dataKey="expenses"
               name="Expenses"
-              stroke={CHART_COLORS.expenses}
-              strokeWidth={2.5}
+              stroke="#f43f5e"
+              strokeWidth={2}
               fill="url(#expenseAreaGrad)"
-              animationDuration={900}
             />
             <Line
               type="monotone"
               dataKey="profit"
               name="Profit"
-              stroke={CHART_COLORS.profit}
+              stroke="#10b981"
               strokeWidth={2}
-              strokeDasharray="6 4"
-              dot={false}
-              animationDuration={900}
+              strokeDasharray="4 4"
+              dot={{ r: 3, fill: '#10b981' }}
             />
           </ComposedChart>
         </ResponsiveContainer>

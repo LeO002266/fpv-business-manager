@@ -267,7 +267,7 @@ export const InvoicesPage: React.FC = () => {
           description="No invoices match your search. Try a different invoice number, client, or project name."
         />
       ) : (
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <THead>
@@ -285,16 +285,16 @@ export const InvoicesPage: React.FC = () => {
               <TBody>
                 {filteredInvoices.map(inv => (
                   <Tr key={inv.id}>
-                    <Td className="px-4 font-mono font-bold text-slate-200">{inv.invoice_number}</Td>
+                    <Td className="px-4 font-mono font-bold text-slate-800">{inv.invoice_number}</Td>
                     <Td className="px-4">
-                      <div className="font-bold text-white">{inv.client_name}</div>
+                      <div className="font-bold text-slate-900">{inv.client_name}</div>
                       <div className="text-[11px] text-slate-400">{inv.project_name || 'General Videography'}</div>
                     </Td>
                     <Td className="px-4 text-slate-400 font-mono text-[11px]">
                       <div>{formatDate(inv.issue_date)}</div>
                       {inv.due_date && <div className="text-[10px] text-slate-500">Due: {formatDate(inv.due_date)}</div>}
                     </Td>
-                    <Td className="px-4 text-right font-mono font-bold text-slate-200">
+                    <Td className="px-4 text-right font-mono font-bold text-slate-800">
                       {formatCurrency(inv.total_amount, inv.currency)}
                     </Td>
                     <Td className="px-4 text-right font-mono text-emerald-400 font-medium">
@@ -321,7 +321,7 @@ export const InvoicesPage: React.FC = () => {
                         <button
                           onClick={() => handleDownloadPDF(inv.id)}
                           title="Download Vector PDF Invoice"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+                          className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                         >
                           <Download className="w-3.5 h-3.5" />
                         </button>
@@ -433,8 +433,8 @@ export const InvoicesPage: React.FC = () => {
             </div>
 
             {/* Shoot Service Line Item */}
-            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
-              <span className="font-bold text-white text-xs uppercase tracking-wide">Primary Service Line Item</span>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <span className="font-bold text-slate-900 text-xs uppercase tracking-wide">Primary Service Line Item</span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Field label="Service Description" className="sm:col-span-2">
                   <Input
@@ -461,7 +461,7 @@ export const InvoicesPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span className="font-bold text-white text-xs uppercase tracking-wide">
+                    <span className="font-bold text-slate-900 text-xs uppercase tracking-wide">
                       Eligible Billable Travel Expenses Found ({unbilledExpenses.length})
                     </span>
                   </div>
@@ -477,7 +477,7 @@ export const InvoicesPage: React.FC = () => {
                         className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                           isChecked
                             ? 'bg-white/[0.05] border-emerald-500/40 text-white'
-                            : 'bg-white/[0.02] border-white/[0.06] text-slate-400'
+                            : 'bg-slate-50/50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -491,7 +491,7 @@ export const InvoicesPage: React.FC = () => {
                                 setSelectedExpenseIds([...selectedExpenseIds, exp.id]);
                               }
                             }}
-                            className="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-white/[0.04] border-white/[0.15]"
+                            className="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-slate-100 border-white/[0.15]"
                           />
                           <div>
                             <div className="font-semibold text-xs text-white">{exp.category} Reimbursement</div>
@@ -533,7 +533,7 @@ export const InvoicesPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>
@@ -554,7 +554,7 @@ export const InvoicesPage: React.FC = () => {
           maxWidth="md"
         >
           <form onSubmit={handleRecordPayment} className="space-y-4 text-xs">
-            <div className="p-3 bg-white/[0.03] rounded-xl border border-white/[0.06] space-y-1">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
               <div className="flex justify-between">
                 <span className="text-slate-400">Total Invoice:</span>
                 <span className="font-mono text-white">{formatCurrency(selectedInvoice.total_amount, selectedInvoice.currency)}</span>
@@ -563,8 +563,8 @@ export const InvoicesPage: React.FC = () => {
                 <span className="text-slate-400">Already Paid:</span>
                 <span className="font-mono text-emerald-400">{formatCurrency(selectedInvoice.amount_paid, selectedInvoice.currency)}</span>
               </div>
-              <div className="flex justify-between font-bold pt-1 border-t border-white/[0.06]">
-                <span className="text-slate-200">Balance Outstanding:</span>
+              <div className="flex justify-between font-bold pt-1 border-t border-slate-200">
+                <span className="text-slate-800">Balance Outstanding:</span>
                 <span className="font-mono text-amber-400">{formatCurrency(selectedInvoice.balance_due, selectedInvoice.currency)}</span>
               </div>
             </div>
@@ -614,7 +614,7 @@ export const InvoicesPage: React.FC = () => {
               />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowPaymentModal(false)}>
                 Cancel
               </Button>

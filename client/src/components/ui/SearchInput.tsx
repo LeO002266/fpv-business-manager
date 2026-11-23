@@ -21,7 +21,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="pl-9 pr-4 py-2.5"
+      className="pl-9 pr-3.5 py-2 text-sm"
     />
   </div>
 );

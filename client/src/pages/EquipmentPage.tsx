@@ -182,7 +182,7 @@ export const EquipmentPage: React.FC = () => {
                     <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       {eq.asset_tag}
                     </span>
-                    <h3 className="text-base font-bold text-white mt-1.5">{eq.name}</h3>
+                    <h3 className="text-base font-bold text-slate-900 mt-1.5">{eq.name}</h3>
                     <p className="text-xs text-slate-400">{eq.brand} · {eq.model}</p>
                   </div>
                   <Badge
@@ -198,14 +198,14 @@ export const EquipmentPage: React.FC = () => {
                   </Badge>
                 </div>
 
-                <div className="mt-4 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-white/[0.06]">
+                <div className="mt-4 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-slate-200">
                   <div className="flex justify-between">
                     <span>Category:</span>
-                    <span className="text-slate-200 font-medium">{eq.category}</span>
+                    <span className="text-slate-800 font-medium">{eq.category}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Serial Number:</span>
-                    <span className="text-slate-200 font-mono text-[11px]">{eq.serial_number || 'N/A'}</span>
+                    <span className="text-slate-800 font-mono text-[11px]">{eq.serial_number || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Purchase Value:</span>
@@ -214,7 +214,7 @@ export const EquipmentPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+              <div className="mt-5 pt-3 border-t border-slate-200 flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
                   Repairs: <span className="text-amber-400 font-mono font-bold">{formatCurrency(eq.total_repair_cost || 0)}</span>
                 </span>
@@ -240,10 +240,10 @@ export const EquipmentPage: React.FC = () => {
           maxWidth="2xl"
         >
           <div className="space-y-5 text-xs">
-            <div className="p-4 bg-white/[0.03] rounded-xl border border-white/[0.06] grid grid-cols-2 gap-3">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 gap-3">
               <div>
                 <span className="text-slate-400">Asset Tag:</span>
-                <div className="font-mono font-bold text-white text-sm">{selectedEquipment.equipment.asset_tag}</div>
+                <div className="font-mono font-bold text-slate-900 text-sm">{selectedEquipment.equipment.asset_tag}</div>
               </div>
               <div>
                 <span className="text-slate-400">Purchase Cost:</span>
@@ -252,7 +252,7 @@ export const EquipmentPage: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between pt-2">
-              <h4 className="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
                 <Wrench className="w-4 h-4 text-emerald-400" />
                 <span>Maintenance & Repair History ({selectedEquipment.maintenanceLogs.length})</span>
               </h4>
@@ -266,13 +266,13 @@ export const EquipmentPage: React.FC = () => {
             </div>
 
             {selectedEquipment.maintenanceLogs.length === 0 ? (
-              <p className="text-slate-500 py-4 text-center bg-white/[0.03] rounded-xl">No repairs or maintenance logged yet.</p>
+              <p className="text-slate-500 py-4 text-center bg-slate-50 rounded-xl">No repairs or maintenance logged yet.</p>
             ) : (
               <div className="space-y-2">
                 {selectedEquipment.maintenanceLogs.map((log: any) => (
-                  <div key={log.id} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+                  <div key={log.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-white">{log.service_type}</div>
+                      <div className="font-bold text-slate-900">{log.service_type}</div>
                       <div className="text-slate-400 text-[11px] mt-0.5">{log.description}</div>
                       <div className="text-slate-500 text-[10px] mt-1">{formatDate(log.service_date)} by {log.performed_by}</div>
                     </div>
@@ -368,7 +368,7 @@ export const EquipmentPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>
@@ -429,7 +429,7 @@ export const EquipmentPage: React.FC = () => {
               />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowMaintenanceModal(false)}>
                 Cancel
               </Button>

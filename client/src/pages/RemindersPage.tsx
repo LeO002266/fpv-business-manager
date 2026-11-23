@@ -130,8 +130,8 @@ export const RemindersPage: React.FC = () => {
             key={rem.id}
             className={`p-4 rounded-xl transition-all flex items-center justify-between ${
               rem.status === 'Completed'
-                ? 'glass opacity-60'
-                : 'glass hover:border-white/10'
+                ? 'bg-white border border-slate-200/90 rounded-xl shadow-xs opacity-60'
+                : 'bg-white border border-slate-200/90 rounded-xl shadow-xs hover:border-white/10'
             }`}
           >
             <div className="flex items-center gap-3.5">
@@ -242,7 +242,7 @@ export const RemindersPage: React.FC = () => {
               />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button
                 type="button"
                 variant="ghost"

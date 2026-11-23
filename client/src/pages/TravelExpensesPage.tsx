@@ -232,11 +232,11 @@ export const TravelExpensesPage: React.FC = () => {
           description="No trips match your current search or billing filter. Try a different route, destination, or billing category."
         />
       ) : (
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <THead>
-                <tr className="bg-white/[0.03]">
+                <tr className="bg-slate-50">
                   <Th className="px-4">Date</Th>
                   <Th className="px-4">Route (Origin → Destination)</Th>
                   <Th className="px-4">Mode / Vehicle</Th>
@@ -255,21 +255,21 @@ export const TravelExpensesPage: React.FC = () => {
                       <div>{exp.from_location} → {exp.to_location}</div>
                       <div className="text-[10px] text-slate-400 font-normal">{exp.trip_type}</div>
                     </Td>
-                    <Td className="px-4 text-slate-300">
+                    <Td className="px-4 text-slate-700">
                       <div>{exp.travel_mode}</div>
                       {exp.vehicle_name && <div className="text-[10px] text-slate-400">{exp.vehicle_name}</div>}
                     </Td>
                     <Td className="px-4">
-                      <span className="font-semibold text-slate-200">{exp.category}</span>
+                      <span className="font-semibold text-slate-800">{exp.category}</span>
                     </Td>
-                    <Td className="px-4 text-slate-300">
+                    <Td className="px-4 text-slate-700">
                       <div>{exp.client_name || 'Internal'}</div>
                       {exp.project_name && <div className="text-[10px] text-slate-400">{exp.project_name}</div>}
                     </Td>
-                    <Td className="px-4 text-right font-mono text-slate-300">
+                    <Td className="px-4 text-right font-mono text-slate-700">
                       {exp.distance_km > 0 ? `${exp.distance_km} km` : '—'}
                     </Td>
-                    <Td className="px-4 text-right font-mono font-bold text-white">
+                    <Td className="px-4 text-right font-mono font-bold text-slate-900">
                       {formatCurrency(exp.amount, exp.currency)}
                     </Td>
                     <Td className="px-4 text-center">
@@ -402,8 +402,8 @@ export const TravelExpensesPage: React.FC = () => {
 
             {/* Fuel Formula Computation Card */}
             {['Petrol', 'Diesel'].includes(formData.category) && (
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
-                <div className="flex items-center justify-between text-slate-300 font-semibold">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between text-slate-700 font-semibold">
                   <span className="flex items-center gap-1.5">
                     <Fuel className="w-4 h-4 text-emerald-400" />
                     <span>Automatic Fuel Calculation Engine</span>
@@ -480,7 +480,7 @@ export const TravelExpensesPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>

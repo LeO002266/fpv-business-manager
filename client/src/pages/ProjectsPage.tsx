@@ -198,8 +198,8 @@ export const ProjectsPage: React.FC = () => {
                     <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       {proj.project_code || 'PRJ'}
                     </span>
-                    <h3 className="text-base font-bold text-white mt-1.5 leading-snug">{proj.name}</h3>
-                    <p className="text-xs text-slate-400 font-medium">Client: <span className="text-slate-300">{proj.client_name}</span></p>
+                    <h3 className="text-base font-bold text-slate-900 mt-1.5 leading-snug">{proj.name}</h3>
+                    <p className="text-xs text-slate-400 font-medium">Client: <span className="text-slate-700">{proj.client_name}</span></p>
                   </div>
                   <Badge
                     variant={
@@ -215,7 +215,7 @@ export const ProjectsPage: React.FC = () => {
                 </div>
 
                 {/* Shoot Schedule & Location */}
-                <div className="mt-3 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-white/[0.06]">
+                <div className="mt-3 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-slate-200">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 text-slate-500" />
                     <span>{formatDate(proj.shoot_date)} {proj.start_time && `(${proj.start_time})`}</span>
@@ -227,10 +227,10 @@ export const ProjectsPage: React.FC = () => {
                 </div>
 
                 {/* Financial Summary */}
-                <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-white/[0.03] rounded-xl border border-white/[0.06] text-center">
+                <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
                   <div>
                     <div className="text-[10px] font-medium text-slate-400 uppercase">Agreed Fee</div>
-                    <div className="text-xs font-bold text-white font-mono mt-0.5">
+                    <div className="text-xs font-bold text-slate-900 font-mono mt-0.5">
                       {formatCurrency(proj.agreed_amount, proj.currency)}
                     </div>
                   </div>
@@ -250,7 +250,7 @@ export const ProjectsPage: React.FC = () => {
               </div>
 
               {/* Action Bar */}
-              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+              <div className="mt-5 pt-3 border-t border-slate-200 flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
                   Est. Profit: <span className="text-emerald-400 font-bold font-mono">{formatCurrency(fin.netProfit, proj.currency)}</span>
                 </span>
@@ -303,25 +303,25 @@ export const ProjectsPage: React.FC = () => {
             </div>
 
             {/* Shoot Overview */}
-            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-white text-sm">{selectedProject.project.name}</span>
+                <span className="font-bold text-slate-900 text-sm">{selectedProject.project.name}</span>
                 <Badge variant="success">
                   {selectedProject.project.status}
                 </Badge>
               </div>
-              <p className="text-slate-400">Client: <span className="text-slate-200 font-semibold">{selectedProject.project.client_name}</span></p>
-              <p className="text-slate-400">Date & Time: <span className="text-slate-200">{formatDate(selectedProject.project.shoot_date)} ({selectedProject.project.start_time} - {selectedProject.project.end_time})</span></p>
-              <p className="text-slate-400">Location: <span className="text-slate-200">{selectedProject.project.location}, {selectedProject.project.city}</span></p>
+              <p className="text-slate-400">Client: <span className="text-slate-800 font-semibold">{selectedProject.project.client_name}</span></p>
+              <p className="text-slate-400">Date & Time: <span className="text-slate-800">{formatDate(selectedProject.project.shoot_date)} ({selectedProject.project.start_time} - {selectedProject.project.end_time})</span></p>
+              <p className="text-slate-400">Location: <span className="text-slate-800">{selectedProject.project.location}, {selectedProject.project.city}</span></p>
               {selectedProject.project.description && (
-                <p className="text-slate-300 pt-2 border-t border-white/[0.06]">{selectedProject.project.description}</p>
+                <p className="text-slate-700 pt-2 border-t border-slate-200">{selectedProject.project.description}</p>
               )}
             </div>
 
             {/* Assigned Crew */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-bold text-white tracking-wide uppercase text-[11px] flex items-center gap-1.5">
+                <h4 className="font-bold text-slate-900 tracking-wide uppercase text-[11px] flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Assigned Crew Members ({selectedProject.members.length})</span>
                 </h4>
@@ -335,17 +335,17 @@ export const ProjectsPage: React.FC = () => {
               </div>
 
               {selectedProject.members.length === 0 ? (
-                <p className="text-slate-500 py-3 text-center bg-white/[0.03] rounded-xl">No crew members assigned yet.</p>
+                <p className="text-slate-500 py-3 text-center bg-slate-50 rounded-xl">No crew members assigned yet.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedProject.members.map((m: any) => (
-                    <div key={m.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+                    <div key={m.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                       <div>
-                        <div className="font-bold text-white">{m.name}</div>
+                        <div className="font-bold text-slate-900">{m.name}</div>
                         <div className="text-slate-400 text-[11px]">{m.role} · {m.phone || 'No phone'}</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-mono font-bold text-slate-200">{formatCurrency(m.agreed_rate)}</div>
+                        <div className="font-mono font-bold text-slate-800">{formatCurrency(m.agreed_rate)}</div>
                         <span className="text-[10px] text-slate-400">{m.pay_type}</span>
                       </div>
                     </div>
@@ -356,19 +356,19 @@ export const ProjectsPage: React.FC = () => {
 
             {/* Linked Travel & Direct Expenses */}
             <div>
-              <h4 className="font-bold text-white tracking-wide uppercase text-[11px] mb-2 flex items-center gap-1.5">
+              <h4 className="font-bold text-slate-900 tracking-wide uppercase text-[11px] mb-2 flex items-center gap-1.5">
                 <Receipt className="w-3.5 h-3.5 text-rose-400" />
                 <span>Shoot Travel & Direct Expenses ({selectedProject.expenses.length})</span>
               </h4>
 
               {selectedProject.expenses.length === 0 ? (
-                <p className="text-slate-500 py-3 text-center bg-white/[0.03] rounded-xl">No expenses recorded against this shoot yet.</p>
+                <p className="text-slate-500 py-3 text-center bg-slate-50 rounded-xl">No expenses recorded against this shoot yet.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedProject.expenses.map((e: any) => (
-                    <div key={e.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+                    <div key={e.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                       <div>
-                        <div className="font-bold text-white">{e.category}</div>
+                        <div className="font-bold text-slate-900">{e.category}</div>
                         <div className="text-slate-400 text-[11px]">
                           {e.from_location ? `${e.from_location} → ${e.to_location}` : e.description}
                         </div>
@@ -502,7 +502,7 @@ export const ProjectsPage: React.FC = () => {
               />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>
@@ -565,7 +565,7 @@ export const ProjectsPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAssignMemberModal(false)}>
                 Cancel
               </Button>

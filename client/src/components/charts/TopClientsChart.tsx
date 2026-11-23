@@ -9,13 +9,13 @@ export interface TopClient {
   revenue: number;
 }
 
-const truncate = (v: string) => (v.length > 18 ? `${v.slice(0, 17)}…` : v);
+const truncate = (v: string) => (v.length > 20 ? `${v.slice(0, 19)}…` : v);
 
 export const TopClientsChart: React.FC<{ data: TopClient[] }> = ({ data }) => {
   if (!data.length) {
     return (
       <div className="h-64 flex items-center justify-center">
-        <p className="text-xs text-slate-500">No invoiced clients yet</p>
+        <p className="text-sm text-slate-400">No invoiced clients recorded yet</p>
       </div>
     );
   }
@@ -28,21 +28,14 @@ export const TopClientsChart: React.FC<{ data: TopClient[] }> = ({ data }) => {
           layout="vertical"
           margin={{ top: 5, right: 24, left: 8, bottom: 5 }}
         >
-          <defs>
-            <linearGradient id="clientBarGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#059669" />
-              <stop offset="100%" stopColor="#34d399" />
-            </linearGradient>
-          </defs>
-
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(148, 163, 184, 0.12)"
+            stroke="#f1f5f9"
             horizontal={false}
           />
           <XAxis
             type="number"
-            stroke="#64748b"
+            stroke="#94a3b8"
             fontSize={11}
             tickLine={false}
             axisLine={false}
@@ -51,21 +44,21 @@ export const TopClientsChart: React.FC<{ data: TopClient[] }> = ({ data }) => {
           <YAxis
             type="category"
             dataKey="name"
-            stroke="#94a3b8"
-            fontSize={11}
+            stroke="#64748b"
+            fontSize={12}
             tickLine={false}
             axisLine={false}
             width={130}
             tickFormatter={truncate}
           />
-          <Tooltip content={<GlassTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.03)' }} />
+          <Tooltip content={<GlassTooltip />} cursor={{ fill: 'rgba(241, 245, 249, 0.6)' }} />
           <Bar
             dataKey="revenue"
             name="Revenue"
-            fill="url(#clientBarGrad)"
-            radius={[0, 6, 6, 0]}
-            barSize={16}
-            animationDuration={900}
+            fill="#4f46e5"
+            radius={[0, 4, 4, 0]}
+            barSize={18}
+            animationDuration={600}
           />
         </BarChart>
       </ResponsiveContainer>

@@ -137,7 +137,7 @@ export const TeamPage: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-base font-bold text-white">{member.name}</h3>
+                    <h3 className="text-base font-bold text-slate-900">{member.name}</h3>
                     <span className="text-xs font-semibold text-emerald-400">{member.role}</span>
                   </div>
                   <Badge
@@ -155,7 +155,7 @@ export const TeamPage: React.FC = () => {
                   </Badge>
                 </div>
 
-                <div className="mt-4 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-white/[0.06]">
+                <div className="mt-4 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-slate-200">
                   <div className="flex items-center gap-2">
                     <Phone className="w-3.5 h-3.5 text-slate-500" />
                     <span>{member.phone || 'No phone'}</span>
@@ -175,7 +175,7 @@ export const TeamPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs">
+              <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
                 <span className="text-slate-400">{member.project_count || 0} shoots completed</span>
                 <span className="text-emerald-400 font-mono font-bold">
                   Earned: {formatCurrency(member.total_earned || 0)}
@@ -266,7 +266,7 @@ export const TeamPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>

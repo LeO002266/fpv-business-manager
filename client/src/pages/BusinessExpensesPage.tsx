@@ -150,11 +150,11 @@ export const BusinessExpensesPage: React.FC = () => {
           description="No business expenses match your search. Try a different category, vendor, or description."
         />
       ) : (
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <THead>
-                <tr className="bg-white/[0.03]">
+                <tr className="bg-slate-50">
                   <Th className="px-4">Date</Th>
                   <Th className="px-4">Category</Th>
                   <Th className="px-4">Description</Th>
@@ -167,8 +167,8 @@ export const BusinessExpensesPage: React.FC = () => {
                 {filteredExpenses.map(e => (
                   <Tr key={e.id}>
                     <Td className="px-4 text-slate-400 font-mono text-[11px]">{formatDate(e.expense_date)}</Td>
-                    <Td className="px-4 font-bold text-white">{e.category}</Td>
-                    <Td className="px-4 text-slate-300 max-w-[220px] truncate">{e.description || '—'}</Td>
+                    <Td className="px-4 font-bold text-slate-900">{e.category}</Td>
+                    <Td className="px-4 text-slate-700 max-w-[220px] truncate">{e.description || '—'}</Td>
                     <Td className="px-4 text-slate-400">
                       <div>{e.vendor_name || 'Direct'}</div>
                       <div className="text-[10px] text-slate-500">{e.payment_method}</div>
@@ -262,7 +262,7 @@ export const BusinessExpensesPage: React.FC = () => {
               />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>

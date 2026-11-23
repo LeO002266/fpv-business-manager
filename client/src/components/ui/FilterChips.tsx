@@ -14,16 +14,16 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
   className = '',
 }) => (
   <div
-    className={`inline-flex items-center gap-1 bg-white/[0.04] border border-white/[0.06] p-1.5 rounded-xl text-xs backdrop-blur ${className}`}
+    className={`inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs border border-slate-200/80 ${className}`}
   >
     {options.map((f) => (
       <button
         key={f.id}
         onClick={() => onChange(f.id)}
-        className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+        className={`px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer ${
           value === f.id
-            ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20'
-            : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
+            ? 'bg-white text-slate-900 font-semibold shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
         }`}
       >
         {f.label}

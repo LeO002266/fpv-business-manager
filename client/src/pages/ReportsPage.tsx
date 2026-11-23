@@ -151,12 +151,12 @@ export const ReportsPage: React.FC = () => {
             />
           </div>
 
-          <div className="glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-white mb-4">Detailed Financial Statement</h3>
+          <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs p-5">
+            <h3 className="text-sm font-bold text-slate-900 mb-4">Detailed Financial Statement</h3>
             <Table>
               <TBody>
                 <Tr>
-                  <Td className="font-bold text-white">Gross Invoiced Revenue (Services + Travel)</Td>
+                  <Td className="font-bold text-slate-900">Gross Invoiced Revenue (Services + Travel)</Td>
                   <Td className="text-right font-mono font-bold text-sky-400">{formatCurrency(pnlData.revenue?.totalInvoiced || 0)}</Td>
                 </Tr>
                 <Tr className="text-slate-400">
@@ -165,19 +165,19 @@ export const ReportsPage: React.FC = () => {
                 </Tr>
                 <Tr className="text-slate-400">
                   <Td className="pl-4">Applicable Taxes (GST) Collected</Td>
-                  <Td className="text-right font-mono text-slate-300">{formatCurrency(pnlData.revenue?.taxCollected || 0)}</Td>
+                  <Td className="text-right font-mono text-slate-700">{formatCurrency(pnlData.revenue?.taxCollected || 0)}</Td>
                 </Tr>
                 <Tr>
-                  <Td className="border-t border-white/[0.06] font-bold text-rose-400">Less: Non-Billable Overhead Expenses</Td>
-                  <Td className="border-t border-white/[0.06] text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.nonBillableOverhead || 0)}</Td>
+                  <Td className="border-t border-slate-200 font-bold text-rose-400">Less: Non-Billable Overhead Expenses</Td>
+                  <Td className="border-t border-slate-200 text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.nonBillableOverhead || 0)}</Td>
                 </Tr>
                 <Tr>
-                  <Td className="border-t border-white/[0.06] font-bold text-rose-400">Less: Pilot & Crew Project Payouts</Td>
-                  <Td className="border-t border-white/[0.06] text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.teamPayouts || 0)}</Td>
+                  <Td className="border-t border-slate-200 font-bold text-rose-400">Less: Pilot & Crew Project Payouts</Td>
+                  <Td className="border-t border-slate-200 text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.teamPayouts || 0)}</Td>
                 </Tr>
-                <Tr className="bg-white/[0.03] font-bold">
-                  <Td className="px-3 bg-white/[0.03] border-t-2 border-emerald-500/40 text-white text-sm">NET BUSINESS PROFIT</Td>
-                  <Td className="px-3 bg-white/[0.03] border-t-2 border-emerald-500/40 text-right font-mono text-emerald-400 text-base">{formatCurrency(pnlData.netProfit || 0)}</Td>
+                <Tr className="bg-slate-50 font-bold">
+                  <Td className="px-3 bg-slate-50 border-t-2 border-emerald-500/40 text-slate-900 text-sm">NET BUSINESS PROFIT</Td>
+                  <Td className="px-3 bg-slate-50 border-t-2 border-emerald-500/40 text-right font-mono text-emerald-400 text-base">{formatCurrency(pnlData.netProfit || 0)}</Td>
                 </Tr>
               </TBody>
             </Table>
@@ -187,11 +187,11 @@ export const ReportsPage: React.FC = () => {
 
       {/* REPORT 2: CLIENT PROFITABILITY */}
       {reportType === 'client' && (
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <THead>
-                <tr className="bg-white/[0.03]">
+                <tr className="bg-slate-50">
                   <Th className="px-4 pt-3">Client Name</Th>
                   <Th className="px-4 pt-3 text-right">Total Billed</Th>
                   <Th className="px-4 pt-3 text-right">Cash Received</Th>
@@ -204,11 +204,11 @@ export const ReportsPage: React.FC = () => {
               <TBody>
                 {clientData.map(c => (
                   <Tr key={c.id}>
-                    <Td className="px-4 font-bold text-white">
+                    <Td className="px-4 font-bold text-slate-900">
                       <div>{c.name}</div>
                       <div className="text-[10px] text-slate-400 font-normal">{c.company}</div>
                     </Td>
-                    <Td className="px-4 text-right font-mono text-slate-200">{formatCurrency(c.totalBilled, c.currency)}</Td>
+                    <Td className="px-4 text-right font-mono text-slate-800">{formatCurrency(c.totalBilled, c.currency)}</Td>
                     <Td className="px-4 text-right font-mono text-emerald-400">{formatCurrency(c.totalReceived, c.currency)}</Td>
                     <Td className="px-4 text-right font-mono text-amber-400">{formatCurrency(c.pendingReceivables, c.currency)}</Td>
                     <Td className="px-4 text-right font-mono text-rose-400">{formatCurrency(c.totalCost, c.currency)}</Td>
@@ -228,11 +228,11 @@ export const ReportsPage: React.FC = () => {
 
       {/* REPORT 3: PROJECT PROFITABILITY */}
       {reportType === 'project' && (
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <THead>
-                <tr className="bg-white/[0.03]">
+                <tr className="bg-slate-50">
                   <Th className="px-4 pt-3">Shoot Name</Th>
                   <Th className="px-4 pt-3">Client</Th>
                   <Th className="px-4 pt-3">Category</Th>
@@ -246,11 +246,11 @@ export const ReportsPage: React.FC = () => {
               <TBody>
                 {projectData.map(p => (
                   <Tr key={p.id}>
-                    <Td className="px-4 font-bold text-white">
+                    <Td className="px-4 font-bold text-slate-900">
                       <div>{p.name}</div>
                       <div className="text-[10px] text-slate-400 font-mono">{formatDate(p.shoot_date)}</div>
                     </Td>
-                    <Td className="px-4 text-slate-300">{p.client_name}</Td>
+                    <Td className="px-4 text-slate-700">{p.client_name}</Td>
                     <Td className="px-4 text-slate-400">{p.category}</Td>
                     <Td className="px-4 text-right font-mono text-white">{formatCurrency(p.agreedAmount, p.currency)}</Td>
                     <Td className="px-4 text-right font-mono text-sky-400">{formatCurrency(p.invoicedAmount, p.currency)}</Td>
@@ -295,8 +295,8 @@ export const ReportsPage: React.FC = () => {
             />
           </div>
 
-          <div className="glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-white mb-3">Vehicle-wise Mileage & Fuel Expenditure</h3>
+          <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs p-5">
+            <h3 className="text-sm font-bold text-slate-900 mb-3">Vehicle-wise Mileage & Fuel Expenditure</h3>
             <Table>
               <THead>
                 <tr>
@@ -311,11 +311,11 @@ export const ReportsPage: React.FC = () => {
               <TBody>
                 {travelData.byVehicle?.map((veh: any, i: number) => (
                   <Tr key={i}>
-                    <Td className="font-bold text-white">{veh.name}</Td>
-                    <Td className="text-slate-300">{veh.type}</Td>
+                    <Td className="font-bold text-slate-900">{veh.name}</Td>
+                    <Td className="text-slate-700">{veh.type}</Td>
                     <Td className="font-mono text-slate-400">{veh.license_plate}</Td>
-                    <Td className="text-right font-mono text-slate-300">{veh.trips}</Td>
-                    <Td className="text-right font-mono text-slate-300">{veh.total_distance} km</Td>
+                    <Td className="text-right font-mono text-slate-700">{veh.trips}</Td>
+                    <Td className="text-right font-mono text-slate-700">{veh.total_distance} km</Td>
                     <Td className="text-right font-mono font-bold text-amber-400">{formatCurrency(veh.total_fuel_cost)}</Td>
                   </Tr>
                 ))}

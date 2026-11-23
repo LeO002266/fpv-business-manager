@@ -11,42 +11,41 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
+          50: '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+        },
+        slate: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
         }
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"Inter"', '"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
-        'glow': '0 0 24px -6px rgba(16, 185, 129, 0.35)',
-        'glow-lg': '0 0 48px -10px rgba(16, 185, 129, 0.45)',
-        'card': '0 10px 30px -12px rgba(0, 0, 0, 0.5)',
-        'card-hover': '0 18px 40px -14px rgba(0, 0, 0, 0.55)',
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'sm': '0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+        'md': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+        'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)',
       },
-      keyframes: {
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        'fade-in-up': {
-          '0%': { opacity: '0', transform: 'translateY(10px) scale(0.98)' },
-          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
-        },
-        'scale-in': {
-          '0%': { opacity: '0', transform: 'scale(0.96)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-      },
-      animation: {
-        'fade-in': 'fade-in 0.2s ease-out',
-        'fade-in-up': 'fade-in-up 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
-        'scale-in': 'scale-in 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
-      },
+      borderRadius: {
+        'xl': '0.75rem',
+        '2xl': '1rem',
+      }
     },
   },
   plugins: [],

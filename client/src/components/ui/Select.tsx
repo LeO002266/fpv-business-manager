@@ -14,6 +14,6 @@ export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
     >
       {children}
     </select>
-    <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
   </div>
 );

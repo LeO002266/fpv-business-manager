@@ -106,7 +106,7 @@ export const SettingsPage: React.FC = () => {
 
       {/* Main Settings Form */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass rounded-2xl p-5">
+        <div className="lg:col-span-2 bg-white border border-slate-200/90 rounded-xl shadow-xs p-5">
           <div className="flex items-center gap-2 text-white font-bold text-sm mb-4">
             <Building className="w-4 h-4 text-emerald-400" />
             <span>Organization Profile & Shoot Presets</span>
@@ -184,7 +184,7 @@ export const SettingsPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-end pt-3 border-t border-slate-200">
               <Button type="submit" icon={Save}>
                 Save Business Settings
               </Button>
@@ -195,7 +195,7 @@ export const SettingsPage: React.FC = () => {
         {/* Currency & Backup Panel */}
         <div className="space-y-6">
           {/* Multi-Currency Engine */}
-          <div className="glass rounded-2xl p-5">
+          <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs p-5">
             <div className="flex items-center gap-2 text-white font-bold text-sm mb-3">
               <Coins className="w-4 h-4 text-emerald-400" />
               <span>Multi-Currency Rates</span>
@@ -204,9 +204,9 @@ export const SettingsPage: React.FC = () => {
 
             <div className="space-y-2.5">
               {currencies.map(c => (
-                <div key={c.code} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+                <div key={c.code} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                   <div>
-                    <span className="font-bold text-white font-mono">{c.code}</span>
+                    <span className="font-bold text-slate-900 font-mono">{c.code}</span>
                     <span className="text-slate-400 text-[11px] ml-1.5">({c.name})</span>
                   </div>
                   {c.is_base ? (
@@ -219,7 +219,7 @@ export const SettingsPage: React.FC = () => {
                         step="0.01"
                         defaultValue={c.default_exchange_rate}
                         onBlur={e => handleRateChange(c.code, Number(e.target.value))}
-                        className="w-16 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5 text-right text-emerald-400 font-bold text-xs"
+                        className="w-16 bg-slate-100 border border-slate-200 rounded px-1.5 py-0.5 text-right text-emerald-400 font-bold text-xs"
                       />
                     </div>
                   )}
@@ -229,8 +229,8 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Database Backup & Restore */}
-          <div className="glass rounded-2xl p-5 space-y-3 text-xs">
-            <h3 className="font-bold text-white text-sm">Data Backup & Migration</h3>
+          <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs p-5 space-y-3 text-xs">
+            <h3 className="font-bold text-slate-900 text-sm">Data Backup & Migration</h3>
             <p className="text-slate-400">
               Download complete database snapshots or import legacy prototype backups.
             </p>
@@ -245,7 +245,7 @@ export const SettingsPage: React.FC = () => {
                 <span>Export Full JSON Backup</span>
               </Button>
 
-              <label className="w-full flex items-center justify-center gap-2 glass text-slate-200 hover:text-white font-semibold py-2.5 rounded-xl cursor-pointer transition-all hover:border-white/10">
+              <label className="w-full flex items-center justify-center gap-2 bg-white border border-slate-200/90 rounded-xl shadow-xs text-slate-800 hover:text-white font-semibold py-2.5 rounded-xl cursor-pointer transition-all hover:border-white/10">
                 <Upload className="w-4 h-4 text-sky-400" />
                 <span>Restore JSON / Legacy Prototype</span>
                 <input

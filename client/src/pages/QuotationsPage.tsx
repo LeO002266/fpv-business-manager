@@ -175,11 +175,11 @@ export const QuotationsPage: React.FC = () => {
           description="No quotations match your search. Create a new quotation to start a pre-booking estimate."
         />
       ) : (
-      <div className="glass rounded-2xl overflow-hidden">
+      <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <THead>
-              <tr className="bg-white/[0.03]">
+              <tr className="bg-slate-50">
                 <Th className="px-4">Quotation #</Th>
                 <Th className="px-4">Client</Th>
                 <Th className="px-4">Issue / Validity Date</Th>
@@ -191,13 +191,13 @@ export const QuotationsPage: React.FC = () => {
             <TBody>
               {filteredQuotations.map(q => (
                 <Tr key={q.id}>
-                  <Td className="px-4 font-mono font-bold text-white">{q.quotation_number}</Td>
-                  <Td className="px-4 font-bold text-slate-200">{q.client_name}</Td>
+                  <Td className="px-4 font-mono font-bold text-slate-900">{q.quotation_number}</Td>
+                  <Td className="px-4 font-bold text-slate-800">{q.client_name}</Td>
                   <Td className="px-4 text-slate-400 font-mono text-[11px]">
                     <div>{formatDate(q.issue_date)}</div>
                     {q.valid_until && <div className="text-[10px] text-slate-500">Valid: {formatDate(q.valid_until)}</div>}
                   </Td>
-                  <Td className="px-4 text-right font-mono font-bold text-slate-200">
+                  <Td className="px-4 text-right font-mono font-bold text-slate-800">
                     {formatCurrency(q.total_amount, q.currency)}
                   </Td>
                   <Td className="px-4 text-center">
@@ -235,7 +235,7 @@ export const QuotationsPage: React.FC = () => {
           maxWidth="md"
         >
           <form onSubmit={handleConvertQuotation} className="space-y-4 text-xs">
-            <div className="p-3.5 bg-white/[0.03] rounded-xl border border-white/[0.06] space-y-1">
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
               <div className="text-slate-400">Client: <span className="text-white font-bold">{selectedQuotation.client_name}</span></div>
               <div className="text-slate-400">Total Agreed Amount: <span className="text-emerald-400 font-bold font-mono">{formatCurrency(selectedQuotation.total_amount, selectedQuotation.currency)}</span></div>
             </div>
@@ -258,17 +258,17 @@ export const QuotationsPage: React.FC = () => {
               />
             </Field>
 
-            <label className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] cursor-pointer">
+            <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
               <input
                 type="checkbox"
                 checked={convertOptions.createInvoice}
                 onChange={e => setConvertOptions({ ...convertOptions, createInvoice: e.target.checked })}
-                className="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-white/[0.06] border-white/[0.08]"
+                className="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-white/[0.06] border-slate-200"
               />
-              <span className="text-slate-300 font-medium">Also automatically generate Tax Invoice now</span>
+              <span className="text-slate-700 font-medium">Also automatically generate Tax Invoice now</span>
             </label>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowConvertModal(false)}>
                 Cancel
               </Button>
@@ -322,7 +322,7 @@ export const QuotationsPage: React.FC = () => {
             {/* Line items */}
             <div className="space-y-2 pt-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-white text-xs uppercase tracking-wide">Quotation Line Items</span>
+                <span className="font-bold text-slate-900 text-xs uppercase tracking-wide">Quotation Line Items</span>
                 <button
                   type="button"
                   onClick={handleAddItem}
@@ -334,7 +334,7 @@ export const QuotationsPage: React.FC = () => {
               </div>
 
               {formData.items.map((item: any, i: number) => (
-                <div key={i} className="grid grid-cols-12 gap-2 items-center bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.06]">
+                <div key={i} className="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                   <div className="col-span-7">
                     <Input
                       type="text"
@@ -367,7 +367,7 @@ export const QuotationsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleRemoveItem(i)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+                        className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                       >
                         ×
                       </button>
@@ -399,7 +399,7 @@ export const QuotationsPage: React.FC = () => {
               </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>

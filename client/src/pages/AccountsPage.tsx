@@ -94,20 +94,20 @@ export const AccountsPage: React.FC = () => {
       </div>
 
       {/* Reconciled Principles Notice */}
-      <div className="glass rounded-2xl p-5 space-y-3 text-xs text-slate-300">
+      <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs p-5 space-y-3 text-xs text-slate-700">
         <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
           <ShieldCheck className="w-4 h-4" />
           <span>Accounting Principles & Financial Integrity</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          <div className="p-3 bg-white/[0.03] rounded-xl border border-white/[0.06] space-y-1">
-            <span className="font-bold text-white">Invoiced Revenue ≠ Cash Received</span>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span className="font-bold text-slate-900">Invoiced Revenue ≠ Cash Received</span>
             <p className="text-slate-400">
               Generating an invoice creates accounts receivable. Revenue is earned on completion of deliverables, but profit realized only occurs when payment is physically credited.
             </p>
           </div>
-          <div className="p-3 bg-white/[0.03] rounded-xl border border-white/[0.06] space-y-1">
-            <span className="font-bold text-white">Pass-Through Reimbursed Travel</span>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span className="font-bold text-slate-900">Pass-Through Reimbursed Travel</span>
             <p className="text-slate-400">
               Client-billable travel costs added to client invoices are reimbursements, not business losses. When the client settles their invoice, that expenditure is fully recovered.
             </p>
@@ -123,10 +123,10 @@ export const AccountsPage: React.FC = () => {
           description="Every issued invoice has been fully collected. Nothing is awaiting payment settlement."
         />
       ) : (
-        <div className="glass rounded-2xl p-5">
+        <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Outstanding Invoice Receivables</h3>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Outstanding Invoice Receivables</h3>
               <p className="text-xs text-slate-400">Active invoices awaiting payment settlement</p>
             </div>
             <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -150,11 +150,11 @@ export const AccountsPage: React.FC = () => {
               <TBody>
                 {invoices.filter(i => i.balance_due > 0 && i.status !== 'Cancelled').map(inv => (
                   <Tr key={inv.id}>
-                    <Td className="font-mono font-bold text-white">{inv.invoice_number}</Td>
-                    <Td className="text-slate-200 font-medium">{inv.client_name}</Td>
+                    <Td className="font-mono font-bold text-slate-900">{inv.invoice_number}</Td>
+                    <Td className="text-slate-800 font-medium">{inv.client_name}</Td>
                     <Td className="text-slate-400 font-mono text-[11px]">{formatDate(inv.issue_date)}</Td>
                     <Td className="text-slate-400 font-mono text-[11px]">{formatDate(inv.due_date)}</Td>
-                    <Td className="text-right font-mono text-slate-200">{formatCurrency(inv.total_amount, inv.currency)}</Td>
+                    <Td className="text-right font-mono text-slate-800">{formatCurrency(inv.total_amount, inv.currency)}</Td>
                     <Td className="text-right font-mono text-emerald-400">{formatCurrency(inv.amount_paid, inv.currency)}</Td>
                     <Td className="text-right font-mono font-bold text-amber-400">{formatCurrency(inv.balance_due, inv.currency)}</Td>
                   </Tr>

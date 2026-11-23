@@ -66,22 +66,22 @@ interface QuickAction {
 }
 
 const quickActions: QuickAction[] = [
-  { tab: 'clients', label: 'New Client', icon: Users, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  { tab: 'projects', label: 'New Shoot', icon: Film, color: 'text-sky-400 bg-sky-500/10 border-sky-500/20' },
-  { tab: 'travel', label: 'Travel / Fuel', icon: MapPin, color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  { tab: 'invoices', label: 'New Invoice', icon: Receipt, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  { tab: 'payments', label: 'Record Payment', icon: CreditCard, color: 'text-teal-400 bg-teal-500/10 border-teal-500/20' },
-  { tab: 'quotations', label: 'New Quotation', icon: FileSpreadsheet, color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-  { tab: 'equipment', label: 'Add Hardware', icon: Cpu, color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
-  { tab: 'team', label: 'Add Crew Member', icon: UserCheck, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' },
+  { tab: 'projects', label: 'New Shoot', icon: Film, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+  { tab: 'travel', label: 'Log Travel / Fuel', icon: MapPin, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+  { tab: 'invoices', label: 'New Invoice', icon: Receipt, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+  { tab: 'clients', label: 'New Client', icon: Users, color: 'text-sky-600 bg-sky-50 border-sky-200' },
+  { tab: 'payments', label: 'Record Payment', icon: CreditCard, color: 'text-teal-600 bg-teal-50 border-teal-200' },
+  { tab: 'quotations', label: 'New Quotation', icon: FileSpreadsheet, color: 'text-purple-600 bg-purple-50 border-purple-200' },
+  { tab: 'equipment', label: 'Add Gear / Drone', icon: Cpu, color: 'text-rose-600 bg-rose-50 border-rose-200' },
+  { tab: 'team', label: 'Add Pilot / Crew', icon: UserCheck, color: 'text-slate-600 bg-slate-100 border-slate-300' },
 ];
 
 function PageFallback() {
   return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <span className="text-xs text-slate-400 font-medium">Loading module...</span>
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <span className="text-sm text-slate-500 font-medium">Loading module...</span>
       </div>
     </div>
   );
@@ -103,7 +103,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}
@@ -113,7 +113,7 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <div className="lg:pl-64 flex flex-col flex-1 min-w-0">
+      <div className="flex-1 flex flex-col min-w-0">
         <Header
           title={getPageTitle()}
           onOpenSidebar={() => setSidebarOpen(true)}
@@ -145,20 +145,20 @@ export function App() {
         <Modal
           isOpen={quickAddOpen}
           onClose={() => setQuickAddOpen(false)}
-          title="Quick Add Action"
+          title="Quick Action"
           maxWidth="md"
         >
-          <div className="space-y-2">
-            <p className="text-xs text-slate-400 mb-3">Select the type of record you wish to create:</p>
+          <div className="space-y-3">
+            <p className="text-xs text-slate-500">Select what you would like to create:</p>
             <div className="grid grid-cols-2 gap-2.5">
               {quickActions.map((action) => (
                 <button
                   key={action.tab}
                   onClick={() => handleQuickSelect(action.tab)}
-                  className="glass glass-hover flex items-center gap-2.5 p-3 rounded-xl text-left text-xs font-semibold text-white"
+                  className="bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-indigo-300 flex items-center gap-2.5 p-3 rounded-xl text-left text-xs font-semibold text-slate-800 transition-all shadow-xs cursor-pointer"
                 >
-                  <span className={`p-1.5 rounded-lg border ${action.color}`}>
-                    <action.icon className="w-3.5 h-3.5" />
+                  <span className={`p-2 rounded-lg border ${action.color}`}>
+                    <action.icon className="w-4 h-4" />
                   </span>
                   <span>{action.label}</span>
                 </button>
@@ -170,4 +170,5 @@ export function App() {
     </div>
   );
 }
+
 export default App;
