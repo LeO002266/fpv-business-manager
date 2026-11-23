@@ -16,6 +16,23 @@ import { Expense, Vehicle, Client, Project, TeamMember } from '../types.js';
 import { api, formatCurrency, formatDate } from '../services/api.js';
 import { Modal } from '../components/Modal.js';
 import { StatCard } from '../components/StatCard.js';
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  SearchInput,
+  Badge,
+  Table,
+  THead,
+  TBody,
+  Tr,
+  Th,
+  Td,
+  PageHeader,
+  FilterChips,
+  EmptyState
+} from '../components/ui/index.js';
 
 export const TravelExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -147,32 +164,23 @@ export const TravelExpensesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Travel & Fuel Expense Logistics</h2>
-          <p className="text-xs text-slate-400">Rajnagar base to Durg, Bhilai, Raipur & national routes with mileage formula calculation</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search route, destination, vehicle..."
+      <PageHeader
+        title="Travel & Fuel Expense Logistics"
+        subtitle="Rajnagar base to Durg, Bhilai, Raipur & national routes with mileage formula calculation"
+        actions={
+          <>
+            <SearchInput
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-56 sm:w-64"
+              onChange={(v) => setSearch(v)}
+              placeholder="Search route, destination, vehicle..."
+              className="w-56 sm:w-64"
             />
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Log Travel / Fuel</span>
-          </button>
-        </div>
-      </div>
+            <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+              Log Travel / Fuel
+            </Button>
+          </>
+        }
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -206,83 +214,83 @@ export const TravelExpensesPage: React.FC = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 text-xs">
-        {['All', 'Billable', 'Overhead'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setBillingFilter(tab)}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-all ${
-              billingFilter === tab
-                ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
-          >
-            {tab === 'All' ? 'All Travel Records' : tab === 'Billable' ? 'Client Billable' : 'Business Expense'}
-          </button>
-        ))}
-      </div>
+      <FilterChips
+        options={[
+          { id: 'All', label: 'All Travel Records' },
+          { id: 'Billable', label: 'Client Billable' },
+          { id: 'Overhead', label: 'Business Expense' }
+        ]}
+        value={billingFilter}
+        onChange={setBillingFilter}
+      />
 
       {/* Travel Register Table */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Route (Origin → Destination)</th>
-                <th className="py-3 px-4">Mode / Vehicle</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Client / Project</th>
-                <th className="py-3 px-4 text-right">Distance</th>
-                <th className="py-3 px-4 text-right">Amount</th>
-                <th className="py-3 px-4 text-center">Billing & Invoice Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {filteredExpenses.map(exp => (
-                <tr key={exp.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">{formatDate(exp.expense_date)}</td>
-                  <td className="py-3 px-4 font-medium text-white">
-                    <div>{exp.from_location} → {exp.to_location}</div>
-                    <div className="text-[10px] text-slate-400 font-normal">{exp.trip_type}</div>
-                  </td>
-                  <td className="py-3 px-4 text-slate-300">
-                    <div>{exp.travel_mode}</div>
-                    {exp.vehicle_name && <div className="text-[10px] text-slate-400">{exp.vehicle_name}</div>}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-semibold text-slate-200">{exp.category}</span>
-                  </td>
-                  <td className="py-3 px-4 text-slate-300">
-                    <div>{exp.client_name || 'Internal'}</div>
-                    {exp.project_name && <div className="text-[10px] text-slate-400">{exp.project_name}</div>}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono text-slate-300">
-                    {exp.distance_km > 0 ? `${exp.distance_km} km` : '—'}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-white">
-                    {formatCurrency(exp.amount, exp.currency)}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="space-y-1">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        exp.billing_treatment === 'Client_Billable'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : 'bg-slate-800 text-slate-400'
-                      }`}>
-                        {exp.billing_treatment === 'Client_Billable' ? 'Client Billable' : 'Business Expense'}
-                      </span>
-                      {exp.invoice_allocation_status === 'Fully_Invoiced' && (
-                        <div className="text-[10px] text-sky-400 font-medium">Billed on Invoice</div>
-                      )}
-                    </div>
-                  </td>
+      {filteredExpenses.length === 0 ? (
+        <EmptyState
+          icon={MapPin}
+          title="No travel expenses found"
+          description="No trips match your current search or billing filter. Try a different route, destination, or billing category."
+        />
+      ) : (
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <THead>
+                <tr className="bg-white/[0.03]">
+                  <Th className="px-4">Date</Th>
+                  <Th className="px-4">Route (Origin → Destination)</Th>
+                  <Th className="px-4">Mode / Vehicle</Th>
+                  <Th className="px-4">Category</Th>
+                  <Th className="px-4">Client / Project</Th>
+                  <Th className="px-4 text-right">Distance</Th>
+                  <Th className="px-4 text-right">Amount</Th>
+                  <Th className="px-4 text-center">Billing & Invoice Status</Th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </THead>
+              <TBody>
+                {filteredExpenses.map(exp => (
+                  <Tr key={exp.id}>
+                    <Td className="px-4 text-slate-400 font-mono text-[11px]">{formatDate(exp.expense_date)}</Td>
+                    <Td className="px-4 font-medium text-white">
+                      <div>{exp.from_location} → {exp.to_location}</div>
+                      <div className="text-[10px] text-slate-400 font-normal">{exp.trip_type}</div>
+                    </Td>
+                    <Td className="px-4 text-slate-300">
+                      <div>{exp.travel_mode}</div>
+                      {exp.vehicle_name && <div className="text-[10px] text-slate-400">{exp.vehicle_name}</div>}
+                    </Td>
+                    <Td className="px-4">
+                      <span className="font-semibold text-slate-200">{exp.category}</span>
+                    </Td>
+                    <Td className="px-4 text-slate-300">
+                      <div>{exp.client_name || 'Internal'}</div>
+                      {exp.project_name && <div className="text-[10px] text-slate-400">{exp.project_name}</div>}
+                    </Td>
+                    <Td className="px-4 text-right font-mono text-slate-300">
+                      {exp.distance_km > 0 ? `${exp.distance_km} km` : '—'}
+                    </Td>
+                    <Td className="px-4 text-right font-mono font-bold text-white">
+                      {formatCurrency(exp.amount, exp.currency)}
+                    </Td>
+                    <Td className="px-4 text-center">
+                      <div className="space-y-1">
+                        <Badge variant={exp.billing_treatment === 'Client_Billable' ? 'success' : 'neutral'}>
+                          {exp.billing_treatment === 'Client_Billable' ? 'Client Billable' : 'Business Expense'}
+                        </Badge>
+                        {exp.invoice_allocation_status === 'Fully_Invoiced' && (
+                          <div>
+                            <Badge variant="info">Billed on Invoice</Badge>
+                          </div>
+                        )}
+                      </div>
+                    </Td>
+                  </Tr>
+                ))}
+              </TBody>
+            </Table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Add Travel Expense Modal */}
       {showAddModal && (
@@ -294,23 +302,19 @@ export const TravelExpensesPage: React.FC = () => {
         >
           <form onSubmit={handleCreateExpense} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Travel Date *</label>
-                <input
+              <Field label="Travel Date *">
+                <Input
                   type="date"
                   required
                   value={formData.expense_date}
                   onChange={e => setFormData({ ...formData, expense_date: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Travel Mode</label>
-                <select
+              <Field label="Travel Mode">
+                <Select
                   value={formData.travel_mode}
                   onChange={e => setFormData({ ...formData, travel_mode: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Bike">Bike</option>
                   <option value="Car">Car</option>
@@ -320,15 +324,13 @@ export const TravelExpensesPage: React.FC = () => {
                   <option value="Taxi">Taxi</option>
                   <option value="Auto">Auto</option>
                   <option value="Other">Other</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Select Vehicle (Auto-fills mileage preset)</label>
-                <select
+              <Field label="Select Vehicle (Auto-fills mileage preset)">
+                <Select
                   value={formData.vehicle_id}
                   onChange={e => handleVehicleChange(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="">-- Manual / No Vehicle --</option>
                   {vehicles.map(v => (
@@ -336,15 +338,13 @@ export const TravelExpensesPage: React.FC = () => {
                       {v.name} ({v.type} - {v.mileage_km_per_liter} km/l {v.fuel_type})
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Expense Category</label>
-                <select
+              <Field label="Expense Category">
+                <Select
                   value={formData.category}
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Petrol">Petrol</option>
                   <option value="Diesel">Diesel</option>
@@ -358,58 +358,51 @@ export const TravelExpensesPage: React.FC = () => {
                   <option value="Taxi">Taxi / Cab</option>
                   <option value="Local Transport">Local Transport</option>
                   <option value="Other">Other Travel</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Origin Location</label>
-                <input
+              <Field label="Origin Location">
+                <Input
                   type="text"
                   placeholder="e.g. Rajnagar Village"
                   value={formData.from_location}
                   onChange={e => setFormData({ ...formData, from_location: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Destination</label>
-                <input
+              <Field label="Destination">
+                <Input
                   type="text"
                   placeholder="e.g. Mayfair Lake Resort, Raipur"
                   value={formData.to_location}
                   onChange={e => setFormData({ ...formData, to_location: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Trip Type</label>
-                <select
+              <Field label="Trip Type">
+                <Select
                   value={formData.trip_type}
                   onChange={e => setFormData({ ...formData, trip_type: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Round-Trip">Round-Trip</option>
                   <option value="One-Way">One-Way</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Distance (km)</label>
-                <input
+              <Field label="Distance (km)">
+                <Input
                   type="number"
                   step="0.1"
                   value={formData.distance_km}
                   onChange={e => handleCalcFieldChange('distance_km', Number(e.target.value))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
             </div>
 
             {/* Fuel Formula Computation Card */}
             {['Petrol', 'Diesel'].includes(formData.category) && (
-              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
                 <div className="flex items-center justify-between text-slate-300 font-semibold">
                   <span className="flex items-center gap-1.5">
                     <Fuel className="w-4 h-4 text-emerald-400" />
@@ -418,98 +411,82 @@ export const TravelExpensesPage: React.FC = () => {
                   <span className="text-[10px] text-slate-400 font-mono">Distance ÷ Mileage × Price</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <label className="block text-slate-400 text-[11px] mb-1">Vehicle Mileage (km/l)</label>
-                    <input
+                  <Field label="Vehicle Mileage (km/l)">
+                    <Input
                       type="number"
                       step="0.1"
                       value={formData.vehicle_mileage}
                       onChange={e => handleCalcFieldChange('vehicle_mileage', Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-white font-mono focus:outline-none focus:border-emerald-500"
+                      className="font-mono"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 text-[11px] mb-1">Fuel Price (₹/litre)</label>
-                    <input
+                  </Field>
+                  <Field label="Fuel Price (₹/litre)">
+                    <Input
                       type="number"
                       step="0.01"
                       value={formData.fuel_price_per_liter}
                       onChange={e => handleCalcFieldChange('fuel_price_per_liter', Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-white font-mono focus:outline-none focus:border-emerald-500"
+                      className="font-mono"
                     />
-                  </div>
+                  </Field>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Actual Amount (₹) *</label>
-                <input
+              <Field label="Actual Amount (₹) *">
+                <Input
                   type="number"
                   step="0.01"
                   required
                   value={formData.amount}
                   onChange={e => setFormData({ ...formData, amount: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono text-base font-bold focus:outline-none focus:border-emerald-500"
+                  className="font-mono text-base font-bold"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Billing Treatment *</label>
-                <select
+              <Field label="Billing Treatment *">
+                <Select
                   value={formData.billing_treatment}
                   onChange={e => setFormData({ ...formData, billing_treatment: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Client_Billable">Client Billable (Add to Client Invoice)</option>
                   <option value="Business_Expense">Business Expense (Internal Business Overhead)</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Link Client (Optional)</label>
-                <select
+              <Field label="Link Client (Optional)">
+                <Select
                   value={formData.client_id}
                   onChange={e => setFormData({ ...formData, client_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="">-- No Client / General Business --</option>
                   {clients.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Link Project (Optional)</label>
-                <select
+              <Field label="Link Project (Optional)">
+                <Select
                   value={formData.project_id}
                   onChange={e => setFormData({ ...formData, project_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="">-- No Project --</option>
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
+              </Button>
+              <Button type="submit">
                 Save Travel Record
-              </button>
+              </Button>
             </div>
           </form>
         </Modal>

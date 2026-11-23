@@ -7,25 +7,17 @@ import {
   MapPin,
   Users,
   Film,
-  Calendar,
-  ArrowUpRight,
-  Sparkles,
   PieChart as PieChartIcon
 } from 'lucide-react';
 import { StatCard } from '../components/StatCard.js';
+import { FilterChips } from '../components/ui/FilterChips.js';
+import { Badge } from '../components/ui/Badge.js';
+import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/Table.js';
 import { api, formatCurrency, formatDate } from '../services/api.js';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  AreaChart,
-  Area,
-  CartesianGrid
-} from 'recharts';
+import { RevenueAreaChart } from '../components/charts/RevenueAreaChart.js';
+import { DonutChart, DonutLegend, DonutSlice } from '../components/charts/DonutChart.js';
+import { TopClientsChart } from '../components/charts/TopClientsChart.js';
+import { CHART_COLORS, DONUT_PALETTE } from '../components/charts/chartTheme.js';
 
 export const DashboardPage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
   const [data, setData] = useState<any>(null);
@@ -83,42 +75,82 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string) => void }> = (
     );
   }
 
-  const { financials = {}, counts = {}, monthlyStats = [], categoryBreakdown = [], topClients = [] } = data || {};
+  const {
+    financials = {},
+    counts = {},
+    monthlyStats = [],
+    categoryBreakdown = [],
+    topClients = []
+  } = data || {};
+
+  // Invoice status totals (base currency, excluding cancelled)
+  const statusColors: Record<string, string> = {
+    'Paid': CHART_COLORS.paid,
+    'Partially Paid': CHART_COLORS.partial,
+    'Unpaid': CHART_COLORS.unpaid,
+    'Overdue': CHART_COLORS.overdue,
+  };
+  const statusTotals: Record<string, number> = {};
+  invoices
+    .filter((i) => i.status !== 'Cancelled')
+    .forEach((i) => {
+      const base = Number(i.total_amount) * Number(i.exchange_rate || 1);
+      statusTotals[i.status] = (statusTotals[i.status] || 0) + base;
+    });
+  const invoiceSlices: DonutSlice[] = Object.entries(statusTotals)
+    .map(([name, value]) => ({
+      name,
+      value: Math.round(value),
+      color: statusColors[name] || CHART_COLORS.other,
+    }))
+    .sort((a, b) => b.value - a.value);
+  const totalBilled = invoiceSlices.reduce((t, s) => t + s.value, 0);
+
+  // Expense category donut: top 5 + Other
+  const rawCatSlices = categoryBreakdown.map((c: any, i: number) => ({
+    name: c.category,
+    value: Number(c.total) || 0,
+    color: DONUT_PALETTE[i % DONUT_PALETTE.length],
+  }));
+  const topCats = rawCatSlices.slice(0, 5);
+  let otherCatValue = 0;
+rawCatSlices.slice(5).forEach((s: any) => { otherCatValue += (s as any).value; });
+  const expenseSlices: DonutSlice[] =
+    otherCatValue > 0
+      ? [...topCats, { name: 'Other', value: otherCatValue, color: CHART_COLORS.other }]
+      : topCats;
+  const totalSpend = expenseSlices.reduce((t, s) => t + s.value, 0);
 
   return (
     <div className="space-y-6">
       {/* Top Banner & Date Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-              Executive Overview
-            </span>
-            <span className="text-xs text-slate-400">Rajnagar Base & Global Operations</span>
-          </div>
-          <h2 className="text-lg sm:text-xl font-bold text-white mt-1">Financial & Shoot Operations Hub</h2>
-        </div>
+      <div className="glass rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div className="absolute -top-24 left-1/3 w-96 h-44 bg-emerald-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-emerald-500/60 via-teal-500/30 to-transparent" />
 
-        {/* Date Filter Buttons */}
-        <div className="flex items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800 text-xs">
-          {[
-            { id: 'all', label: 'All Time' },
-            { id: 'today', label: 'Today' },
-            { id: 'month', label: 'This Month' },
-            { id: 'year', label: 'This Year' }
-          ].map(f => (
-            <button
-              key={f.id}
-              onClick={() => setTimeFilter(f.id)}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                timeFilter === f.id
-                  ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                Executive Overview
+              </span>
+              <span className="text-xs text-slate-400">Rajnagar Base & Global Operations</span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white mt-2 tracking-tight">
+              Financial & Shoot Operations Hub
+            </h2>
+          </div>
+
+          <FilterChips
+            options={[
+              { id: 'all', label: 'All Time' },
+              { id: 'today', label: 'Today' },
+              { id: 'month', label: 'This Month' },
+              { id: 'year', label: 'This Year' },
+            ]}
+            value={timeFilter}
+            onChange={setTimeFilter}
+          />
         </div>
       </div>
 
@@ -187,72 +219,39 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string) => void }> = (
 
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Monthly Revenue vs Expense Bar Chart */}
-        <div className="lg:col-span-2 p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+        {/* Revenue vs Expense Trend */}
+        <div className="glass lg:col-span-2 p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight">Revenue vs. Expense Trajectory</h3>
-              <p className="text-xs text-slate-400">Monthly billing vs actual cash outlays</p>
+              <p className="text-xs text-slate-400">Monthly billing vs cash outlays with profit trend</p>
             </div>
-            <span className="text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-mono">
+            <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full font-mono border border-emerald-500/20">
               Live Trend
             </span>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} tickFormatter={v => `₹${v/1000}k`} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: any) => formatCurrency(val)}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Bar dataKey="revenue" name="Invoiced Revenue" fill="#38bdf8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expenses" name="Total Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <RevenueAreaChart data={monthlyStats} />
         </div>
 
-        {/* Expense Category Breakdown */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-white tracking-tight">Expense Category Allocation</h3>
-                <p className="text-xs text-slate-400">Top operational costs</p>
-              </div>
-              <PieChartIcon className="w-4 h-4 text-slate-400" />
+        {/* Expense Category Donut */}
+        <div className="glass p-5 rounded-2xl flex flex-col">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">Expense Allocation</h3>
+              <p className="text-xs text-slate-400">Top operational cost categories</p>
             </div>
-
-            <div className="space-y-3 mt-2">
-              {categoryBreakdown.slice(0, 5).map((cat: any, i: number) => {
-                const totalExp = financials.totalExpenses || 1;
-                const pct = Math.round((cat.total / totalExp) * 100);
-                return (
-                  <div key={i} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-300 font-medium">{cat.category}</span>
-                      <span className="text-slate-400 font-mono">{formatCurrency(cat.total)} ({pct}%)</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-emerald-400 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, Math.max(5, pct))}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <PieChartIcon className="w-4 h-4 text-slate-400" />
           </div>
-
-          <div className="pt-4 border-t border-slate-800/80 mt-4">
+          <DonutChart
+            data={expenseSlices}
+            centerValue={formatCurrency(totalSpend)}
+            centerLabel="Total Spend"
+          />
+          <DonutLegend slices={expenseSlices} total={totalSpend} />
+          <div className="pt-3 mt-auto">
             <button
               onClick={() => onNavigate('travel')}
-              className="w-full text-xs text-center text-emerald-400 hover:text-emerald-300 font-medium py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
+              className="w-full text-xs text-center text-emerald-400 hover:text-emerald-300 font-semibold py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
             >
               View Route & Mileage Details →
             </button>
@@ -260,10 +259,42 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string) => void }> = (
         </div>
       </div>
 
+      {/* Performance Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Clients */}
+        <div className="glass lg:col-span-2 p-5 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">Top Clients by Revenue</h3>
+              <p className="text-xs text-slate-400">Highest-billing clients of all time</p>
+            </div>
+            <Users className="w-4 h-4 text-slate-400" />
+          </div>
+          <TopClientsChart data={topClients} />
+        </div>
+
+        {/* Invoice Status Donut */}
+        <div className="glass p-5 rounded-2xl flex flex-col">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">Invoice Status</h3>
+              <p className="text-xs text-slate-400">Outstanding vs collected billings</p>
+            </div>
+            <Receipt className="w-4 h-4 text-slate-400" />
+          </div>
+          <DonutChart
+            data={invoiceSlices}
+            centerValue={formatCurrency(totalBilled)}
+            centerLabel="Total Billed"
+          />
+          <DonutLegend slices={invoiceSlices} total={totalBilled} />
+        </div>
+      </div>
+
       {/* Recent Activity: Invoices & Expenses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Invoices */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+        <div className="glass p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight">Recent Invoices</h3>
@@ -271,48 +302,50 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string) => void }> = (
             </div>
             <button
               onClick={() => onNavigate('invoices')}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
             >
               All Invoices ({invoices.length}) →
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider">
-                  <th className="pb-2.5">Invoice</th>
-                  <th className="pb-2.5">Client</th>
-                  <th className="pb-2.5 text-right">Total</th>
-                  <th className="pb-2.5 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {invoices.slice(0, 5).map(inv => (
-                  <tr key={inv.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 font-mono font-medium text-slate-200">{inv.invoice_number}</td>
-                    <td className="py-2.5 text-slate-300 font-medium">{inv.client_name}</td>
-                    <td className="py-2.5 text-right font-mono text-slate-200">{formatCurrency(inv.total_amount, inv.currency)}</td>
-                    <td className="py-2.5 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        inv.status === 'Paid'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : inv.status === 'Partially Paid'
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                      }`}>
-                        {inv.status}
-                      </span>
-                    </td>
+            {invoices.length === 0 ? (
+              <p className="text-xs text-slate-500 py-6 text-center">No invoices yet</p>
+            ) : (
+              <Table>
+                <THead>
+                  <tr>
+                    <Th>Invoice</Th>
+                    <Th>Client</Th>
+                    <Th className="text-right">Total</Th>
+                    <Th className="text-center">Status</Th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </THead>
+                <TBody>
+                  {invoices.slice(0, 5).map(inv => (
+                    <Tr key={inv.id}>
+                      <Td className="font-mono font-medium text-slate-200">{inv.invoice_number}</Td>
+                      <Td className="text-slate-300 font-medium">{inv.client_name}</Td>
+                      <Td className="text-right font-mono text-slate-200">{formatCurrency(inv.total_amount, inv.currency)}</Td>
+                      <Td className="text-center">
+                        <Badge variant={
+                          inv.status === 'Paid' ? 'success'
+                          : inv.status === 'Partially Paid' ? 'warning'
+                          : 'danger'
+                        }>
+                          {inv.status}
+                        </Badge>
+                      </Td>
+                    </Tr>
+                  ))}
+                </TBody>
+              </Table>
+            )}
           </div>
         </div>
 
         {/* Recent Travel & Expenses */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+        <div className="glass p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight">Recent Travel & Project Expenses</h3>
@@ -320,45 +353,45 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string) => void }> = (
             </div>
             <button
               onClick={() => onNavigate('travel')}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
             >
               All Expenses ({expenses.length}) →
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider">
-                  <th className="pb-2.5">Date</th>
-                  <th className="pb-2.5">Category</th>
-                  <th className="pb-2.5">Route / Details</th>
-                  <th className="pb-2.5 text-right">Amount</th>
-                  <th className="pb-2.5 text-center">Billing</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {expenses.slice(0, 5).map(exp => (
-                  <tr key={exp.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 text-slate-400 font-mono text-[11px]">{formatDate(exp.expense_date)}</td>
-                    <td className="py-2.5 text-slate-200 font-medium">{exp.category}</td>
-                    <td className="py-2.5 text-slate-400 truncate max-w-[150px]">
-                      {exp.from_location ? `${exp.from_location} → ${exp.to_location}` : exp.description || '—'}
-                    </td>
-                    <td className="py-2.5 text-right font-mono text-slate-200">{formatCurrency(exp.amount, exp.currency)}</td>
-                    <td className="py-2.5 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        exp.billing_treatment === 'Client_Billable'
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : 'bg-slate-800 text-slate-400'
-                      }`}>
-                        {exp.billing_treatment === 'Client_Billable' ? 'Billable' : 'Overhead'}
-                      </span>
-                    </td>
+            {expenses.length === 0 ? (
+              <p className="text-xs text-slate-500 py-6 text-center">No expenses recorded yet</p>
+            ) : (
+              <Table>
+                <THead>
+                  <tr>
+                    <Th>Date</Th>
+                    <Th>Category</Th>
+                    <Th>Route / Details</Th>
+                    <Th className="text-right">Amount</Th>
+                    <Th className="text-center">Billing</Th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </THead>
+                <TBody>
+                  {expenses.slice(0, 5).map(exp => (
+                    <Tr key={exp.id}>
+                      <Td className="text-slate-400 font-mono text-[11px]">{formatDate(exp.expense_date)}</Td>
+                      <Td className="text-slate-200 font-medium">{exp.category}</Td>
+                      <Td className="text-slate-400 truncate max-w-[150px]">
+                        {exp.from_location ? `${exp.from_location} → ${exp.to_location}` : exp.description || '—'}
+                      </Td>
+                      <Td className="text-right font-mono text-slate-200">{formatCurrency(exp.amount, exp.currency)}</Td>
+                      <Td className="text-center">
+                        <Badge variant={exp.billing_treatment === 'Client_Billable' ? 'success' : 'neutral'}>
+                          {exp.billing_treatment === 'Client_Billable' ? 'Billable' : 'Overhead'}
+                        </Badge>
+                      </Td>
+                    </Tr>
+                  ))}
+                </TBody>
+              </Table>
+            )}
           </div>
         </div>
       </div>

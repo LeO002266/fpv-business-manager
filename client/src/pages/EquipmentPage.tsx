@@ -16,6 +16,18 @@ import { Equipment } from '../types.js';
 import { api, formatCurrency, formatDate } from '../services/api.js';
 import { Modal } from '../components/Modal.js';
 import { StatCard } from '../components/StatCard.js';
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  Textarea,
+  SearchInput,
+  Badge,
+  Card,
+  PageHeader,
+  EmptyState
+} from '../components/ui/index.js';
 
 export const EquipmentPage: React.FC = () => {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -111,32 +123,23 @@ export const EquipmentPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Drone & Equipment Asset Inventory</h2>
-          <p className="text-xs text-slate-400">FPV fleet, high-speed cameras, LiPo battery sets, controllers, and maintenance logs</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search drones, goggles, serial..."
+      <PageHeader
+        title="Drone & Equipment Asset Inventory"
+        subtitle="FPV fleet, high-speed cameras, LiPo battery sets, controllers, and maintenance logs"
+        actions={
+          <>
+            <SearchInput
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-56 sm:w-64"
+              onChange={(v) => setSearch(v)}
+              placeholder="Search drones, goggles, serial..."
+              className="w-56 sm:w-64"
             />
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Equipment</span>
-          </button>
-        </div>
-      </div>
+            <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+              Add Equipment
+            </Button>
+          </>
+        }
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -163,63 +166,70 @@ export const EquipmentPage: React.FC = () => {
       </div>
 
       {/* Equipment Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredEquipment.map(eq => (
-          <div
-            key={eq.id}
-            className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    {eq.asset_tag}
-                  </span>
-                  <h3 className="text-base font-bold text-white mt-1.5">{eq.name}</h3>
-                  <p className="text-xs text-slate-400">{eq.brand} · {eq.model}</p>
+      {filteredEquipment.length === 0 ? (
+        <EmptyState
+          icon={Cpu}
+          title="No equipment found"
+          description="No drones, cameras, or gear match your search. Try a different name, brand, or asset tag."
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredEquipment.map(eq => (
+            <Card key={eq.id} hover className="p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      {eq.asset_tag}
+                    </span>
+                    <h3 className="text-base font-bold text-white mt-1.5">{eq.name}</h3>
+                    <p className="text-xs text-slate-400">{eq.brand} · {eq.model}</p>
+                  </div>
+                  <Badge
+                    variant={
+                      eq.condition === 'New'
+                        ? 'success'
+                        : eq.condition === 'Needs Repair'
+                        ? 'warning'
+                        : 'neutral'
+                    }
+                  >
+                    {eq.condition}
+                  </Badge>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                  eq.condition === 'New'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : eq.condition === 'Needs Repair'
-                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    : 'bg-slate-800 text-slate-300'
-                }`}>
-                  {eq.condition}
+
+                <div className="mt-4 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-white/[0.06]">
+                  <div className="flex justify-between">
+                    <span>Category:</span>
+                    <span className="text-slate-200 font-medium">{eq.category}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Serial Number:</span>
+                    <span className="text-slate-200 font-mono text-[11px]">{eq.serial_number || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Purchase Value:</span>
+                    <span className="text-white font-mono font-bold">{formatCurrency(eq.purchase_cost, eq.currency)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  Repairs: <span className="text-amber-400 font-mono font-bold">{formatCurrency(eq.total_repair_cost || 0)}</span>
                 </span>
+                <button
+                  onClick={() => openEquipmentDetail(eq.id)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl transition-all"
+                >
+                  <span>Service Logs</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-
-              <div className="mt-4 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-slate-800/60">
-                <div className="flex justify-between">
-                  <span>Category:</span>
-                  <span className="text-slate-200 font-medium">{eq.category}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Serial Number:</span>
-                  <span className="text-slate-200 font-mono text-[11px]">{eq.serial_number || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Purchase Value:</span>
-                  <span className="text-white font-mono font-bold">{formatCurrency(eq.purchase_cost, eq.currency)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-              <span className="text-[11px] text-slate-400">
-                Repairs: <span className="text-amber-400 font-mono font-bold">{formatCurrency(eq.total_repair_cost || 0)}</span>
-              </span>
-              <button
-                onClick={() => openEquipmentDetail(eq.id)}
-                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl transition-all"
-              >
-                <span>Service Logs</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Equipment Detail Modal */}
       {selectedEquipment && (
@@ -230,7 +240,7 @@ export const EquipmentPage: React.FC = () => {
           maxWidth="2xl"
         >
           <div className="space-y-5 text-xs">
-            <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800 grid grid-cols-2 gap-3">
+            <div className="p-4 bg-white/[0.03] rounded-xl border border-white/[0.06] grid grid-cols-2 gap-3">
               <div>
                 <span className="text-slate-400">Asset Tag:</span>
                 <div className="font-mono font-bold text-white text-sm">{selectedEquipment.equipment.asset_tag}</div>
@@ -256,11 +266,11 @@ export const EquipmentPage: React.FC = () => {
             </div>
 
             {selectedEquipment.maintenanceLogs.length === 0 ? (
-              <p className="text-slate-500 py-4 text-center bg-slate-950/40 rounded-xl">No repairs or maintenance logged yet.</p>
+              <p className="text-slate-500 py-4 text-center bg-white/[0.03] rounded-xl">No repairs or maintenance logged yet.</p>
             ) : (
               <div className="space-y-2">
                 {selectedEquipment.maintenanceLogs.map((log: any) => (
-                  <div key={log.id} className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                  <div key={log.id} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                     <div>
                       <div className="font-bold text-white">{log.service_type}</div>
                       <div className="text-slate-400 text-[11px] mt-0.5">{log.description}</div>
@@ -287,24 +297,20 @@ export const EquipmentPage: React.FC = () => {
         >
           <form onSubmit={handleCreateEquipment} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Asset Name *</label>
-                <input
+              <Field label="Asset Name *">
+                <Input
                   type="text"
                   required
                   placeholder="e.g. iFlight Nazgul Evoque F5D 6S"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Category</label>
-                <select
+              <Field label="Category">
+                <Select
                   value={formData.category}
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="FPV Drone">FPV Drone</option>
                   <option value="Camera">Camera (GoPro / Naked / Cinema)</option>
@@ -316,73 +322,59 @@ export const EquipmentPage: React.FC = () => {
                   <option value="Vehicle">Vehicle</option>
                   <option value="Accessories">Accessories</option>
                   <option value="Other">Other</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Brand</label>
-                <input
+              <Field label="Brand">
+                <Input
                   type="text"
                   placeholder="e.g. iFlight, BetaFPV, GoPro, DJI, TBS"
                   value={formData.brand}
                   onChange={e => setFormData({ ...formData, brand: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Model / Version</label>
-                <input
+              <Field label="Model / Version">
+                <Input
                   type="text"
                   placeholder="e.g. Evoque F5 DeadCat V2"
                   value={formData.model}
                   onChange={e => setFormData({ ...formData, model: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Purchase Cost (₹) *</label>
-                <input
+              <Field label="Purchase Cost (₹) *">
+                <Input
                   type="number"
                   step="0.01"
                   required
                   value={formData.purchase_cost}
                   onChange={e => setFormData({ ...formData, purchase_cost: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Condition</label>
-                <select
+              <Field label="Condition">
+                <Select
                   value={formData.condition}
                   onChange={e => setFormData({ ...formData, condition: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="New">New</option>
                   <option value="Good">Good</option>
                   <option value="Fair">Fair</option>
                   <option value="Needs Repair">Needs Repair</option>
                   <option value="Retired">Retired</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
+              </Button>
+              <Button type="submit">
                 Save Equipment
-              </button>
+              </Button>
             </div>
           </form>
         </Modal>
@@ -397,67 +389,53 @@ export const EquipmentPage: React.FC = () => {
           maxWidth="md"
         >
           <form onSubmit={handleLogMaintenance} className="space-y-4 text-xs">
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Service / Repair Type *</label>
-              <input
+            <Field label="Service / Repair Type *">
+              <Input
                 type="text"
                 required
                 placeholder="e.g. Motor replacement, bell balancing"
                 value={maintenanceData.service_type}
                 onChange={e => setMaintenanceData({ ...maintenanceData, service_type: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
+            </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Repair Cost (₹) *</label>
-                <input
+              <Field label="Repair Cost (₹) *">
+                <Input
                   type="number"
                   step="0.01"
                   required
                   value={maintenanceData.cost}
                   onChange={e => setMaintenanceData({ ...maintenanceData, cost: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Service Date</label>
-                <input
+              <Field label="Service Date">
+                <Input
                   type="date"
                   required
                   value={maintenanceData.service_date}
                   onChange={e => setMaintenanceData({ ...maintenanceData, service_date: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Work Done / Technical Notes</label>
-              <textarea
+            <Field label="Work Done / Technical Notes">
+              <Textarea
                 rows={2}
                 value={maintenanceData.description}
                 onChange={e => setMaintenanceData({ ...maintenanceData, description: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
+            </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowMaintenanceModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowMaintenanceModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
+              </Button>
+              <Button type="submit">
                 Save Repair Log
-              </button>
+              </Button>
             </div>
           </form>
         </Modal>

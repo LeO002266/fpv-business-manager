@@ -10,6 +10,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { api } from '../services/api.js';
+import { Button, Field, Input, Textarea, PageHeader } from '../components/ui/index.js';
 
 export const SettingsPage: React.FC = () => {
   const [org, setOrg] = useState<any>({
@@ -91,10 +92,10 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div>
-        <h2 className="text-xl font-bold text-white tracking-tight">Enterprise Business Settings & Multi-Currency Engine</h2>
-        <p className="text-xs text-slate-400">Configure base location, fuel parameters, global exchange rates, and database backup / restore</p>
-      </div>
+      <PageHeader
+        title="Enterprise Business Settings & Multi-Currency Engine"
+        subtitle="Configure base location, fuel parameters, global exchange rates, and database backup / restore"
+      />
 
       {savedSuccess && (
         <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
@@ -105,7 +106,7 @@ export const SettingsPage: React.FC = () => {
 
       {/* Main Settings Form */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+        <div className="lg:col-span-2 glass rounded-2xl p-5">
           <div className="flex items-center gap-2 text-white font-bold text-sm mb-4">
             <Building className="w-4 h-4 text-emerald-400" />
             <span>Organization Profile & Shoot Presets</span>
@@ -113,97 +114,80 @@ export const SettingsPage: React.FC = () => {
 
           <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Business / Production Brand Name</label>
-                <input
+              <Field label="Business / Production Brand Name">
+                <Input
                   type="text"
                   value={org.name}
                   onChange={e => setOrg({ ...org, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Base Origin Location (Editable)</label>
-                <input
+              <Field label="Base Origin Location (Editable)">
+                <Input
                   type="text"
                   value={org.base_city}
                   onChange={e => setOrg({ ...org, base_city: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Default Fuel Price (₹ / Litre)</label>
-                <input
+              <Field label="Default Fuel Price (₹ / Litre)">
+                <Input
                   type="number"
                   step="0.01"
                   value={org.fuel_price}
                   onChange={e => setOrg({ ...org, fuel_price: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Default Vehicle Mileage (km / L)</label>
-                <input
+              <Field label="Default Vehicle Mileage (km / L)">
+                <Input
                   type="number"
                   step="0.1"
                   value={org.default_mileage}
                   onChange={e => setOrg({ ...org, default_mileage: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Phone / WhatsApp</label>
-                <input
+              <Field label="Phone / WhatsApp">
+                <Input
                   type="text"
                   value={org.phone}
                   onChange={e => setOrg({ ...org, phone: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Official Email</label>
-                <input
+              <Field label="Official Email">
+                <Input
                   type="email"
                   value={org.email}
                   onChange={e => setOrg({ ...org, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div className="sm:col-span-2">
-                <label className="block text-slate-400 mb-1 font-medium">GSTIN / Tax Registration Number</label>
-                <input
+              <Field label="GSTIN / Tax Registration Number" className="sm:col-span-2">
+                <Input
                   type="text"
                   value={org.gstin}
                   onChange={e => setOrg({ ...org, gstin: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div className="sm:col-span-2">
-                <label className="block text-slate-400 mb-1 font-medium">Registered Business Address</label>
-                <textarea
+              <Field label="Registered Business Address" className="sm:col-span-2">
+                <Textarea
                   rows={2}
                   value={org.address}
                   onChange={e => setOrg({ ...org, address: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-slate-800">
-              <button
-                type="submit"
-                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
-                <Save className="w-4 h-4" />
-                <span>Save Business Settings</span>
-              </button>
+            <div className="flex justify-end pt-3 border-t border-white/[0.06]">
+              <Button type="submit" icon={Save}>
+                Save Business Settings
+              </Button>
             </div>
           </form>
         </div>
@@ -211,7 +195,7 @@ export const SettingsPage: React.FC = () => {
         {/* Currency & Backup Panel */}
         <div className="space-y-6">
           {/* Multi-Currency Engine */}
-          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+          <div className="glass rounded-2xl p-5">
             <div className="flex items-center gap-2 text-white font-bold text-sm mb-3">
               <Coins className="w-4 h-4 text-emerald-400" />
               <span>Multi-Currency Rates</span>
@@ -220,7 +204,7 @@ export const SettingsPage: React.FC = () => {
 
             <div className="space-y-2.5">
               {currencies.map(c => (
-                <div key={c.code} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
+                <div key={c.code} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                   <div>
                     <span className="font-bold text-white font-mono">{c.code}</span>
                     <span className="text-slate-400 text-[11px] ml-1.5">({c.name})</span>
@@ -235,7 +219,7 @@ export const SettingsPage: React.FC = () => {
                         step="0.01"
                         defaultValue={c.default_exchange_rate}
                         onBlur={e => handleRateChange(c.code, Number(e.target.value))}
-                        className="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-right text-emerald-400 font-bold text-xs"
+                        className="w-16 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5 text-right text-emerald-400 font-bold text-xs"
                       />
                     </div>
                   )}
@@ -245,22 +229,23 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Database Backup & Restore */}
-          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 text-xs">
+          <div className="glass rounded-2xl p-5 space-y-3 text-xs">
             <h3 className="font-bold text-white text-sm">Data Backup & Migration</h3>
             <p className="text-slate-400">
               Download complete database snapshots or import legacy prototype backups.
             </p>
 
             <div className="space-y-2 pt-1">
-              <button
+              <Button
                 onClick={handleDownloadBackup}
-                className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl border border-slate-700 transition-all"
+                variant="secondary"
+                className="w-full"
               >
                 <Download className="w-4 h-4 text-emerald-400" />
                 <span>Export Full JSON Backup</span>
-              </button>
+              </Button>
 
-              <label className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl border border-slate-700 cursor-pointer transition-all">
+              <label className="w-full flex items-center justify-center gap-2 glass text-slate-200 hover:text-white font-semibold py-2.5 rounded-xl cursor-pointer transition-all hover:border-white/10">
                 <Upload className="w-4 h-4 text-sky-400" />
                 <span>Restore JSON / Legacy Prototype</span>
                 <input

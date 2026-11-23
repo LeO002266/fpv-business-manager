@@ -14,6 +14,23 @@ import { Expense, Project } from '../types.js';
 import { api, formatCurrency, formatDate } from '../services/api.js';
 import { Modal } from '../components/Modal.js';
 import { StatCard } from '../components/StatCard.js';
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  Textarea,
+  SearchInput,
+  Badge,
+  Table,
+  THead,
+  TBody,
+  Tr,
+  Th,
+  Td,
+  PageHeader,
+  EmptyState
+} from '../components/ui/index.js';
 
 export const BusinessExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -82,32 +99,23 @@ export const BusinessExpensesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">General Business & Equipment Expenses</h2>
-          <p className="text-xs text-slate-400">Drone/Camera repairs, battery inventory, software licenses, and operational overhead</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search category, vendor, parts..."
+      <PageHeader
+        title="General Business & Equipment Expenses"
+        subtitle="Drone/Camera repairs, battery inventory, software licenses, and operational overhead"
+        actions={
+          <>
+            <SearchInput
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-56 sm:w-64"
+              onChange={(v) => setSearch(v)}
+              placeholder="Search category, vendor, parts..."
+              className="w-56 sm:w-64"
             />
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Business Expense</span>
-          </button>
-        </div>
-      </div>
+            <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+              Add Business Expense
+            </Button>
+          </>
+        }
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -135,43 +143,49 @@ export const BusinessExpensesPage: React.FC = () => {
       </div>
 
       {/* Expenses Table */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Description</th>
-                <th className="py-3 px-4">Vendor & Payment</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {filteredExpenses.map(e => (
-                <tr key={e.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">{formatDate(e.expense_date)}</td>
-                  <td className="py-3 px-4 font-bold text-white">{e.category}</td>
-                  <td className="py-3 px-4 text-slate-300 max-w-[220px] truncate">{e.description || '—'}</td>
-                  <td className="py-3 px-4 text-slate-400">
-                    <div>{e.vendor_name || 'Direct'}</div>
-                    <div className="text-[10px] text-slate-500">{e.payment_method}</div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
-                      {e.expense_type}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-rose-400 text-sm">
-                    {formatCurrency(e.amount, e.currency)}
-                  </td>
+      {filteredExpenses.length === 0 ? (
+        <EmptyState
+          icon={TrendingDown}
+          title="No expenses found"
+          description="No business expenses match your search. Try a different category, vendor, or description."
+        />
+      ) : (
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <THead>
+                <tr className="bg-white/[0.03]">
+                  <Th className="px-4">Date</Th>
+                  <Th className="px-4">Category</Th>
+                  <Th className="px-4">Description</Th>
+                  <Th className="px-4">Vendor & Payment</Th>
+                  <Th className="px-4">Type</Th>
+                  <Th className="px-4 text-right">Amount</Th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </THead>
+              <TBody>
+                {filteredExpenses.map(e => (
+                  <Tr key={e.id}>
+                    <Td className="px-4 text-slate-400 font-mono text-[11px]">{formatDate(e.expense_date)}</Td>
+                    <Td className="px-4 font-bold text-white">{e.category}</Td>
+                    <Td className="px-4 text-slate-300 max-w-[220px] truncate">{e.description || '—'}</Td>
+                    <Td className="px-4 text-slate-400">
+                      <div>{e.vendor_name || 'Direct'}</div>
+                      <div className="text-[10px] text-slate-500">{e.payment_method}</div>
+                    </Td>
+                    <Td className="px-4">
+                      <Badge variant="neutral">{e.expense_type}</Badge>
+                    </Td>
+                    <Td className="px-4 text-right font-mono font-bold text-rose-400 text-sm">
+                      {formatCurrency(e.amount, e.currency)}
+                    </Td>
+                  </Tr>
+                ))}
+              </TBody>
+            </Table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Add Expense Modal */}
       {showAddModal && (
@@ -183,9 +197,8 @@ export const BusinessExpensesPage: React.FC = () => {
         >
           <form onSubmit={handleCreateExpense} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Expense Category *</label>
-                <select
+              <Field label="Expense Category *">
+                <Select
                   value={formData.category}
                   onChange={e => {
                     const cat = e.target.value;
@@ -195,7 +208,6 @@ export const BusinessExpensesPage: React.FC = () => {
                     }
                     setFormData({ ...formData, category: cat, expense_type: type });
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Battery Purchase">Battery Purchase (LiPo Packs)</option>
                   <option value="Drone Repair">Drone Repair / Frame Replacement</option>
@@ -208,69 +220,55 @@ export const BusinessExpensesPage: React.FC = () => {
                   <option value="Marketing">Marketing & Advertising</option>
                   <option value="Salaries">Team Salaries / Freelancers</option>
                   <option value="Miscellaneous">Miscellaneous</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Date *</label>
-                <input
+              <Field label="Date *">
+                <Input
                   type="date"
                   required
                   value={formData.expense_date}
                   onChange={e => setFormData({ ...formData, expense_date: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Amount (₹) *</label>
-                <input
+              <Field label="Amount (₹) *">
+                <Input
                   type="number"
                   step="0.01"
                   required
                   value={formData.amount}
                   onChange={e => setFormData({ ...formData, amount: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono text-base font-bold focus:outline-none focus:border-emerald-500"
+                  className="font-mono text-base font-bold"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Vendor / Supplier</label>
-                <input
+              <Field label="Vendor / Supplier">
+                <Input
                   type="text"
                   placeholder="e.g. Robu.in, Amazon, DJI Store"
                   value={formData.vendor_name}
                   onChange={e => setFormData({ ...formData, vendor_name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Itemized Description</label>
-              <textarea
+            <Field label="Itemized Description">
+              <Textarea
                 rows={2}
                 placeholder="Details of parts purchased or services paid..."
                 value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
+            </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
+              </Button>
+              <Button type="submit">
                 Save Expense
-              </button>
+              </Button>
             </div>
           </form>
         </Modal>

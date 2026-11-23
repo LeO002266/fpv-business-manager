@@ -12,6 +12,18 @@ import {
 } from 'lucide-react';
 import { api, formatCurrency, formatDate } from '../services/api.js';
 import { StatCard } from '../components/StatCard.js';
+import {
+  Button,
+  PageHeader,
+  FilterChips,
+  Badge,
+  Table,
+  THead,
+  TBody,
+  Tr,
+  Th,
+  Td
+} from '../components/ui/index.js';
 
 export const ReportsPage: React.FC = () => {
   const [reportType, setReportType] = useState<'pnl' | 'client' | 'project' | 'travel'>('pnl');
@@ -95,42 +107,27 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Financial & Operational Analytics Reports</h2>
-          <p className="text-xs text-slate-400">Profit & loss statements, client-wise profit rankings, project profitability, and travel auditing</p>
-        </div>
-
-        <button
-          onClick={handleExportCurrent}
-          className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition-all self-start sm:self-auto"
-        >
-          <Download className="w-4 h-4 text-emerald-400" />
-          <span>Export CSV Report</span>
-        </button>
-      </div>
+      <PageHeader
+        title="Financial & Operational Analytics Reports"
+        subtitle="Profit & loss statements, client-wise profit rankings, project profitability, and travel auditing"
+        actions={
+          <Button onClick={handleExportCurrent} icon={Download}>
+            Export CSV Report
+          </Button>
+        }
+      />
 
       {/* Report Switcher Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
-        {[
+      <FilterChips
+        options={[
           { id: 'pnl', label: '1. Profit & Loss Statement' },
           { id: 'client', label: '2. Client Profitability Ranking' },
           { id: 'project', label: '3. Project-wise Margins' },
           { id: 'travel', label: '4. Fuel & Route Logistics' }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setReportType(tab.id as any)}
-            className={`px-3 py-2 rounded-xl font-medium transition-all ${
-              reportType === tab.id
-                ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+        ]}
+        value={reportType}
+        onChange={(id) => setReportType(id as any)}
+      />
 
       {/* REPORT 1: P&L STATEMENT */}
       {reportType === 'pnl' && pnlData && (
@@ -154,120 +151,120 @@ export const ReportsPage: React.FC = () => {
             />
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+          <div className="glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-white mb-4">Detailed Financial Statement</h3>
-            <table className="w-full text-xs">
-              <tbody className="divide-y divide-slate-800/80">
-                <tr className="py-2.5">
-                  <td className="py-2.5 font-bold text-white">Gross Invoiced Revenue (Services + Travel)</td>
-                  <td className="py-2.5 text-right font-mono font-bold text-sky-400">{formatCurrency(pnlData.revenue?.totalInvoiced || 0)}</td>
-                </tr>
-                <tr className="py-2.5 text-slate-400">
-                  <td className="py-2.5 pl-4">Pass-Through Reimbursed Travel Charges</td>
-                  <td className="py-2.5 text-right font-mono text-emerald-400">+{formatCurrency(pnlData.billableExpenses || 0)}</td>
-                </tr>
-                <tr className="py-2.5 text-slate-400">
-                  <td className="py-2.5 pl-4">Applicable Taxes (GST) Collected</td>
-                  <td className="py-2.5 text-right font-mono text-slate-300">{formatCurrency(pnlData.revenue?.taxCollected || 0)}</td>
-                </tr>
-                <tr className="py-2.5 border-t border-slate-700">
-                  <td className="py-2.5 font-bold text-rose-400">Less: Non-Billable Overhead Expenses</td>
-                  <td className="py-2.5 text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.nonBillableOverhead || 0)}</td>
-                </tr>
-                <tr className="py-2.5 border-t border-slate-700">
-                  <td className="py-2.5 font-bold text-rose-400">Less: Pilot & Crew Project Payouts</td>
-                  <td className="py-2.5 text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.teamPayouts || 0)}</td>
-                </tr>
-                <tr className="py-3 bg-slate-950/60 font-bold border-t-2 border-emerald-500/40">
-                  <td className="py-3 px-3 text-white text-sm">NET BUSINESS PROFIT</td>
-                  <td className="py-3 px-3 text-right font-mono text-emerald-400 text-base">{formatCurrency(pnlData.netProfit || 0)}</td>
-                </tr>
-              </tbody>
-            </table>
+            <Table>
+              <TBody>
+                <Tr>
+                  <Td className="font-bold text-white">Gross Invoiced Revenue (Services + Travel)</Td>
+                  <Td className="text-right font-mono font-bold text-sky-400">{formatCurrency(pnlData.revenue?.totalInvoiced || 0)}</Td>
+                </Tr>
+                <Tr className="text-slate-400">
+                  <Td className="pl-4">Pass-Through Reimbursed Travel Charges</Td>
+                  <Td className="text-right font-mono text-emerald-400">+{formatCurrency(pnlData.billableExpenses || 0)}</Td>
+                </Tr>
+                <Tr className="text-slate-400">
+                  <Td className="pl-4">Applicable Taxes (GST) Collected</Td>
+                  <Td className="text-right font-mono text-slate-300">{formatCurrency(pnlData.revenue?.taxCollected || 0)}</Td>
+                </Tr>
+                <Tr>
+                  <Td className="border-t border-white/[0.06] font-bold text-rose-400">Less: Non-Billable Overhead Expenses</Td>
+                  <Td className="border-t border-white/[0.06] text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.nonBillableOverhead || 0)}</Td>
+                </Tr>
+                <Tr>
+                  <Td className="border-t border-white/[0.06] font-bold text-rose-400">Less: Pilot & Crew Project Payouts</Td>
+                  <Td className="border-t border-white/[0.06] text-right font-mono font-bold text-rose-400">-{formatCurrency(pnlData.teamPayouts || 0)}</Td>
+                </Tr>
+                <Tr className="bg-white/[0.03] font-bold">
+                  <Td className="px-3 bg-white/[0.03] border-t-2 border-emerald-500/40 text-white text-sm">NET BUSINESS PROFIT</Td>
+                  <Td className="px-3 bg-white/[0.03] border-t-2 border-emerald-500/40 text-right font-mono text-emerald-400 text-base">{formatCurrency(pnlData.netProfit || 0)}</Td>
+                </Tr>
+              </TBody>
+            </Table>
           </div>
         </div>
       )}
 
       {/* REPORT 2: CLIENT PROFITABILITY */}
       {reportType === 'client' && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="glass rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                  <th className="py-3 px-4">Client Name</th>
-                  <th className="py-3 px-4 text-right">Total Billed</th>
-                  <th className="py-3 px-4 text-right">Cash Received</th>
-                  <th className="py-3 px-4 text-right">Pending Receivables</th>
-                  <th className="py-3 px-4 text-right">Direct Costs</th>
-                  <th className="py-3 px-4 text-right">Net Profit</th>
-                  <th className="py-3 px-4 text-center">Profit Margin</th>
+            <Table>
+              <THead>
+                <tr className="bg-white/[0.03]">
+                  <Th className="px-4 pt-3">Client Name</Th>
+                  <Th className="px-4 pt-3 text-right">Total Billed</Th>
+                  <Th className="px-4 pt-3 text-right">Cash Received</Th>
+                  <Th className="px-4 pt-3 text-right">Pending Receivables</Th>
+                  <Th className="px-4 pt-3 text-right">Direct Costs</Th>
+                  <Th className="px-4 pt-3 text-right">Net Profit</Th>
+                  <Th className="px-4 pt-3 text-center">Profit Margin</Th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              </THead>
+              <TBody>
                 {clientData.map(c => (
-                  <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4 font-bold text-white">
+                  <Tr key={c.id}>
+                    <Td className="px-4 font-bold text-white">
                       <div>{c.name}</div>
                       <div className="text-[10px] text-slate-400 font-normal">{c.company}</div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono text-slate-200">{formatCurrency(c.totalBilled, c.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-emerald-400">{formatCurrency(c.totalReceived, c.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-amber-400">{formatCurrency(c.pendingReceivables, c.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-rose-400">{formatCurrency(c.totalCost, c.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">{formatCurrency(c.netProfit, c.currency)}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                    </Td>
+                    <Td className="px-4 text-right font-mono text-slate-200">{formatCurrency(c.totalBilled, c.currency)}</Td>
+                    <Td className="px-4 text-right font-mono text-emerald-400">{formatCurrency(c.totalReceived, c.currency)}</Td>
+                    <Td className="px-4 text-right font-mono text-amber-400">{formatCurrency(c.pendingReceivables, c.currency)}</Td>
+                    <Td className="px-4 text-right font-mono text-rose-400">{formatCurrency(c.totalCost, c.currency)}</Td>
+                    <Td className="px-4 text-right font-mono font-bold text-emerald-400">{formatCurrency(c.netProfit, c.currency)}</Td>
+                    <Td className="px-4 text-center">
+                      <Badge variant="success" className="font-mono">
                         {c.profitMarginPercent}%
-                      </span>
-                    </td>
-                  </tr>
+                      </Badge>
+                    </Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
+              </TBody>
+            </Table>
           </div>
         </div>
       )}
 
       {/* REPORT 3: PROJECT PROFITABILITY */}
       {reportType === 'project' && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="glass rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                  <th className="py-3 px-4">Shoot Name</th>
-                  <th className="py-3 px-4">Client</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4 text-right">Agreed Fee</th>
-                  <th className="py-3 px-4 text-right">Invoiced</th>
-                  <th className="py-3 px-4 text-right">Crew & Direct Cost</th>
-                  <th className="py-3 px-4 text-right">Net Shoot Profit</th>
-                  <th className="py-3 px-4 text-center">Margin %</th>
+            <Table>
+              <THead>
+                <tr className="bg-white/[0.03]">
+                  <Th className="px-4 pt-3">Shoot Name</Th>
+                  <Th className="px-4 pt-3">Client</Th>
+                  <Th className="px-4 pt-3">Category</Th>
+                  <Th className="px-4 pt-3 text-right">Agreed Fee</Th>
+                  <Th className="px-4 pt-3 text-right">Invoiced</Th>
+                  <Th className="px-4 pt-3 text-right">Crew & Direct Cost</Th>
+                  <Th className="px-4 pt-3 text-right">Net Shoot Profit</Th>
+                  <Th className="px-4 pt-3 text-center">Margin %</Th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              </THead>
+              <TBody>
                 {projectData.map(p => (
-                  <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4 font-bold text-white">
+                  <Tr key={p.id}>
+                    <Td className="px-4 font-bold text-white">
                       <div>{p.name}</div>
                       <div className="text-[10px] text-slate-400 font-mono">{formatDate(p.shoot_date)}</div>
-                    </td>
-                    <td className="py-3 px-4 text-slate-300">{p.client_name}</td>
-                    <td className="py-3 px-4 text-slate-400">{p.category}</td>
-                    <td className="py-3 px-4 text-right font-mono text-white">{formatCurrency(p.agreedAmount, p.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-sky-400">{formatCurrency(p.invoicedAmount, p.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-rose-400">{formatCurrency(p.totalCost, p.currency)}</td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">{formatCurrency(p.netProfit, p.currency)}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                    </Td>
+                    <Td className="px-4 text-slate-300">{p.client_name}</Td>
+                    <Td className="px-4 text-slate-400">{p.category}</Td>
+                    <Td className="px-4 text-right font-mono text-white">{formatCurrency(p.agreedAmount, p.currency)}</Td>
+                    <Td className="px-4 text-right font-mono text-sky-400">{formatCurrency(p.invoicedAmount, p.currency)}</Td>
+                    <Td className="px-4 text-right font-mono text-rose-400">{formatCurrency(p.totalCost, p.currency)}</Td>
+                    <Td className="px-4 text-right font-mono font-bold text-emerald-400">{formatCurrency(p.netProfit, p.currency)}</Td>
+                    <Td className="px-4 text-center">
+                      <Badge variant="success" className="font-mono">
                         {p.profitMarginPercent}%
-                      </span>
-                    </td>
-                  </tr>
+                      </Badge>
+                    </Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
+              </TBody>
+            </Table>
           </div>
         </div>
       )}
@@ -298,32 +295,32 @@ export const ReportsPage: React.FC = () => {
             />
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+          <div className="glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-white mb-3">Vehicle-wise Mileage & Fuel Expenditure</h3>
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
-                  <th className="pb-2">Vehicle</th>
-                  <th className="pb-2">Type</th>
-                  <th className="pb-2">License Plate</th>
-                  <th className="pb-2 text-right">Trips</th>
-                  <th className="pb-2 text-right">Total Distance</th>
-                  <th className="pb-2 text-right">Fuel Cost</th>
+            <Table>
+              <THead>
+                <tr>
+                  <Th>Vehicle</Th>
+                  <Th>Type</Th>
+                  <Th>License Plate</Th>
+                  <Th className="text-right">Trips</Th>
+                  <Th className="text-right">Total Distance</Th>
+                  <Th className="text-right">Fuel Cost</Th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              </THead>
+              <TBody>
                 {travelData.byVehicle?.map((veh: any, i: number) => (
-                  <tr key={i} className="hover:bg-slate-800/40">
-                    <td className="py-2.5 font-bold text-white">{veh.name}</td>
-                    <td className="py-2.5 text-slate-300">{veh.type}</td>
-                    <td className="py-2.5 font-mono text-slate-400">{veh.license_plate}</td>
-                    <td className="py-2.5 text-right font-mono text-slate-300">{veh.trips}</td>
-                    <td className="py-2.5 text-right font-mono text-slate-300">{veh.total_distance} km</td>
-                    <td className="py-2.5 text-right font-mono font-bold text-amber-400">{formatCurrency(veh.total_fuel_cost)}</td>
-                  </tr>
+                  <Tr key={i}>
+                    <Td className="font-bold text-white">{veh.name}</Td>
+                    <Td className="text-slate-300">{veh.type}</Td>
+                    <Td className="font-mono text-slate-400">{veh.license_plate}</Td>
+                    <Td className="text-right font-mono text-slate-300">{veh.trips}</Td>
+                    <Td className="text-right font-mono text-slate-300">{veh.total_distance} km</Td>
+                    <Td className="text-right font-mono font-bold text-amber-400">{formatCurrency(veh.total_fuel_cost)}</Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
+              </TBody>
+            </Table>
           </div>
         </div>
       )}

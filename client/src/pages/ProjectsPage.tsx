@@ -18,6 +18,19 @@ import { Project, Client, TeamMember, Equipment } from '../types.js';
 import { api, formatCurrency, formatDate } from '../services/api.js';
 import { Modal } from '../components/Modal.js';
 import { StatCard } from '../components/StatCard.js';
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  Textarea,
+  SearchInput,
+  Badge,
+  PageHeader,
+  Card,
+  FilterChips,
+  EmptyState
+} from '../components/ui/index.js';
 
 export const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -128,51 +141,44 @@ export const ProjectsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header & Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Shoot Bookings & Project Management</h2>
-          <p className="text-xs text-slate-400">FPV shoot schedules, location logistics, crew rates, and project-wise profitability</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search shoots, client, location..."
+      <PageHeader
+        title="Shoot Bookings & Project Management"
+        subtitle="FPV shoot schedules, location logistics, crew rates, and project-wise profitability"
+        actions={
+          <>
+            <SearchInput
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-56 sm:w-64"
+              onChange={(v) => setSearch(v)}
+              placeholder="Search shoots, client, location..."
+              className="w-56 sm:w-64"
             />
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>New Shoot</span>
-          </button>
-        </div>
-      </div>
+            <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+              New Shoot
+            </Button>
+          </>
+        }
+      />
 
       {/* Status Filter Chips */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar text-xs">
-        {['All', 'Confirmed', 'Scheduled', 'In Progress', 'Completed', 'Invoiced', 'Paid', 'Lead'].map(st => (
-          <button
-            key={st}
-            onClick={() => setStatusFilter(st)}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-all ${
-              statusFilter === st
-                ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
-          >
-            {st}
-          </button>
-        ))}
+      <div className="overflow-x-auto pb-2 custom-scrollbar">
+        <FilterChips
+          options={['All', 'Confirmed', 'Scheduled', 'In Progress', 'Completed', 'Invoiced', 'Paid', 'Lead'].map(st => ({
+            id: st,
+            label: st
+          }))}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
       </div>
 
       {/* Projects Grid */}
+      {filteredProjects.length === 0 ? (
+        <EmptyState
+          icon={Film}
+          title="No shoots found"
+          description="No projects match your search or selected status. Adjust the filters or create a new shoot booking."
+        />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredProjects.map(proj => {
           const fin = proj.financials || {
@@ -184,10 +190,7 @@ export const ProjectsPage: React.FC = () => {
           };
 
           return (
-            <div
-              key={proj.id}
-              className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
-            >
+            <Card key={proj.id} hover className="p-5 flex flex-col justify-between">
               <div>
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
@@ -198,19 +201,21 @@ export const ProjectsPage: React.FC = () => {
                     <h3 className="text-base font-bold text-white mt-1.5 leading-snug">{proj.name}</h3>
                     <p className="text-xs text-slate-400 font-medium">Client: <span className="text-slate-300">{proj.client_name}</span></p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                    proj.status === 'Completed'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      : proj.status === 'In Progress'
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                      : 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-                  }`}>
+                  <Badge
+                    variant={
+                      proj.status === 'Completed'
+                        ? 'success'
+                        : proj.status === 'In Progress'
+                        ? 'warning'
+                        : 'info'
+                    }
+                  >
                     {proj.status}
-                  </span>
+                  </Badge>
                 </div>
 
                 {/* Shoot Schedule & Location */}
-                <div className="mt-3 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-slate-800/60">
+                <div className="mt-3 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-white/[0.06]">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 text-slate-500" />
                     <span>{formatDate(proj.shoot_date)} {proj.start_time && `(${proj.start_time})`}</span>
@@ -222,7 +227,7 @@ export const ProjectsPage: React.FC = () => {
                 </div>
 
                 {/* Financial Summary */}
-                <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-center">
+                <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-white/[0.03] rounded-xl border border-white/[0.06] text-center">
                   <div>
                     <div className="text-[10px] font-medium text-slate-400 uppercase">Agreed Fee</div>
                     <div className="text-xs font-bold text-white font-mono mt-0.5">
@@ -245,7 +250,7 @@ export const ProjectsPage: React.FC = () => {
               </div>
 
               {/* Action Bar */}
-              <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
                   Est. Profit: <span className="text-emerald-400 font-bold font-mono">{formatCurrency(fin.netProfit, proj.currency)}</span>
                 </span>
@@ -257,10 +262,11 @@ export const ProjectsPage: React.FC = () => {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
+      )}
 
       {/* Project Detail Dashboard Modal */}
       {selectedProject && (
@@ -297,18 +303,18 @@ export const ProjectsPage: React.FC = () => {
             </div>
 
             {/* Shoot Overview */}
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-white text-sm">{selectedProject.project.name}</span>
-                <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Badge variant="success">
                   {selectedProject.project.status}
-                </span>
+                </Badge>
               </div>
               <p className="text-slate-400">Client: <span className="text-slate-200 font-semibold">{selectedProject.project.client_name}</span></p>
               <p className="text-slate-400">Date & Time: <span className="text-slate-200">{formatDate(selectedProject.project.shoot_date)} ({selectedProject.project.start_time} - {selectedProject.project.end_time})</span></p>
               <p className="text-slate-400">Location: <span className="text-slate-200">{selectedProject.project.location}, {selectedProject.project.city}</span></p>
               {selectedProject.project.description && (
-                <p className="text-slate-300 pt-2 border-t border-slate-800/80">{selectedProject.project.description}</p>
+                <p className="text-slate-300 pt-2 border-t border-white/[0.06]">{selectedProject.project.description}</p>
               )}
             </div>
 
@@ -329,11 +335,11 @@ export const ProjectsPage: React.FC = () => {
               </div>
 
               {selectedProject.members.length === 0 ? (
-                <p className="text-slate-500 py-3 text-center bg-slate-950/40 rounded-xl">No crew members assigned yet.</p>
+                <p className="text-slate-500 py-3 text-center bg-white/[0.03] rounded-xl">No crew members assigned yet.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedProject.members.map((m: any) => (
-                    <div key={m.id} className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={m.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-bold text-white">{m.name}</div>
                         <div className="text-slate-400 text-[11px]">{m.role} · {m.phone || 'No phone'}</div>
@@ -356,11 +362,11 @@ export const ProjectsPage: React.FC = () => {
               </h4>
 
               {selectedProject.expenses.length === 0 ? (
-                <p className="text-slate-500 py-3 text-center bg-slate-950/40 rounded-xl">No expenses recorded against this shoot yet.</p>
+                <p className="text-slate-500 py-3 text-center bg-white/[0.03] rounded-xl">No expenses recorded against this shoot yet.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedProject.expenses.map((e: any) => (
-                    <div key={e.id} className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={e.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-bold text-white">{e.category}</div>
                         <div className="text-slate-400 text-[11px]">
@@ -369,9 +375,9 @@ export const ProjectsPage: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <div className="font-mono font-bold text-rose-400">{formatCurrency(e.amount, e.currency)}</div>
-                        <span className="text-[10px] font-semibold text-emerald-400">
+                        <Badge variant={e.billing_treatment === 'Client_Billable' ? 'success' : 'neutral'}>
                           {e.billing_treatment === 'Client_Billable' ? 'Billable to Client' : 'Internal Overhead'}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
                   ))}
@@ -392,39 +398,33 @@ export const ProjectsPage: React.FC = () => {
         >
           <form onSubmit={handleCreateProject} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Select Client *</label>
-                <select
+              <Field label="Select Client *">
+                <Select
                   required
                   value={formData.client_id}
                   onChange={e => setFormData({ ...formData, client_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="">-- Choose Client --</option>
                   {clients.map(c => (
                     <option key={c.id} value={c.id}>{c.name} ({c.client_type})</option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Project Name *</label>
-                <input
+              <Field label="Project Name *">
+                <Input
                   type="text"
                   required
                   placeholder="e.g. Mayfair Lake Resort Baraat Shoot"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Shoot Category</label>
-                <select
+              <Field label="Shoot Category">
+                <Select
                   value={formData.category}
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Wedding Shoot">Wedding Shoot</option>
                   <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
@@ -437,95 +437,76 @@ export const ProjectsPage: React.FC = () => {
                   <option value="Travel Videography">Travel Videography</option>
                   <option value="Commercial FPV Shoot">Commercial FPV Shoot</option>
                   <option value="Other">Other</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Shoot Date *</label>
-                <input
+              <Field label="Shoot Date *">
+                <Input
                   type="date"
                   required
                   value={formData.shoot_date}
                   onChange={e => setFormData({ ...formData, shoot_date: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Location / Venue</label>
-                <input
+              <Field label="Location / Venue">
+                <Input
                   type="text"
                   placeholder="e.g. Mayfair Lake Resort, Raipur"
                   value={formData.location}
                   onChange={e => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Agreed Service Fee (₹) *</label>
-                <input
+              <Field label="Agreed Service Fee (₹) *">
+                <Input
                   type="number"
                   step="0.01"
                   required
                   value={formData.agreed_amount}
                   onChange={e => setFormData({ ...formData, agreed_amount: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Advance Amount Expected</label>
-                <input
+              <Field label="Advance Amount Expected">
+                <Input
                   type="number"
                   step="0.01"
                   value={formData.advance_amount}
                   onChange={e => setFormData({ ...formData, advance_amount: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Status</label>
-                <select
+              <Field label="Status">
+                <Select
                   value={formData.status}
                   onChange={e => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Confirmed">Confirmed</option>
                   <option value="Scheduled">Scheduled</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Lead">Lead</option>
                   <option value="Completed">Completed</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
             </div>
 
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Description & Flight Directives</label>
-              <textarea
+            <Field label="Description & Flight Directives">
+              <Textarea
                 rows={2}
                 placeholder="Specific shot requirements, drone models requested, safety guidelines..."
                 value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
+            </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
-                Save Project
-              </button>
+              </Button>
+              <Button type="submit">Save Project</Button>
             </div>
           </form>
         </Modal>
@@ -540,71 +521,55 @@ export const ProjectsPage: React.FC = () => {
           maxWidth="md"
         >
           <form onSubmit={handleAssignMember} className="space-y-4 text-xs">
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Select Crew Member *</label>
-              <select
+            <Field label="Select Crew Member *">
+              <Select
                 required
                 value={memberFormData.team_member_id}
                 onChange={e => setMemberFormData({ ...memberFormData, team_member_id: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               >
                 <option value="">-- Choose Member --</option>
                 {team.map(t => (
                   <option key={t.id} value={t.id}>{t.name} ({t.role})</option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </Field>
 
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Role on Shoot</label>
-              <input
+            <Field label="Role on Shoot">
+              <Input
                 type="text"
                 value={memberFormData.role}
                 onChange={e => setMemberFormData({ ...memberFormData, role: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
+            </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Pay Type</label>
-                <select
+              <Field label="Pay Type">
+                <Select
                   value={memberFormData.pay_type}
                   onChange={e => setMemberFormData({ ...memberFormData, pay_type: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Per-Day">Per-Day</option>
                   <option value="Per-Project">Per-Project</option>
                   <option value="Hourly">Hourly</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Agreed Rate (₹)</label>
-                <input
+              <Field label="Agreed Rate (₹)">
+                <Input
                   type="number"
                   step="0.01"
                   value={memberFormData.agreed_rate}
                   onChange={e => setMemberFormData({ ...memberFormData, agreed_rate: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowAssignMemberModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowAssignMemberModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
-                Confirm Assignment
-              </button>
+              </Button>
+              <Button type="submit">Confirm Assignment</Button>
             </div>
           </form>
         </Modal>

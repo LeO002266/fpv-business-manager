@@ -24,6 +24,18 @@ import { Client } from '../types.js';
 import { api, formatCurrency, formatDate } from '../services/api.js';
 import { Modal } from '../components/Modal.js';
 import { StatCard } from '../components/StatCard.js';
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  Textarea,
+  SearchInput,
+  Badge,
+  PageHeader,
+  Card,
+  EmptyState
+} from '../components/ui/index.js';
 
 export const ClientsPage: React.FC = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -112,34 +124,32 @@ export const ClientsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Client CRM & Financial Portfolios</h2>
-          <p className="text-xs text-slate-400">Independent accounting, shoot history, and billing records per client</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search clients, company, city..."
+      <PageHeader
+        title="Client CRM & Financial Portfolios"
+        subtitle="Independent accounting, shoot history, and billing records per client"
+        actions={
+          <>
+            <SearchInput
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-60 sm:w-72"
+              onChange={(v) => setSearch(v)}
+              placeholder="Search clients, company, city..."
+              className="w-56 sm:w-64"
             />
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Client</span>
-          </button>
-        </div>
-      </div>
+            <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+              Add Client
+            </Button>
+          </>
+        }
+      />
 
       {/* Clients Card Grid */}
+      {filteredClients.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="No clients found"
+          description="No clients match your current search. Adjust the keywords or add a new client to the CRM."
+        />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredClients.map(client => {
           const fin = client.financials || {
@@ -152,10 +162,7 @@ export const ClientsPage: React.FC = () => {
           };
 
           return (
-            <div
-              key={client.id}
-              className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
-            >
+            <Card key={client.id} hover className="p-5 flex flex-col justify-between">
               <div>
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
@@ -168,13 +175,13 @@ export const ClientsPage: React.FC = () => {
                       <p className="text-xs text-slate-400 font-medium">{client.company_name}</p>
                     )}
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-400 bg-slate-800/80 px-2 py-1 rounded-lg">
+                  <span className="text-[11px] font-semibold text-slate-400 bg-white/[0.06] px-2 py-1 rounded-lg">
                     {client.client_type}
                   </span>
                 </div>
 
                 {/* Contact metadata */}
-                <div className="mt-3 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-slate-800/60">
+                <div className="mt-3 space-y-1.5 text-xs text-slate-400 pt-3 border-t border-white/[0.06]">
                   <div className="flex items-center gap-2">
                     <Phone className="w-3.5 h-3.5 text-slate-500" />
                     <span>{client.phone || client.whatsapp || 'No contact phone'}</span>
@@ -186,7 +193,7 @@ export const ClientsPage: React.FC = () => {
                 </div>
 
                 {/* Financial KPI Summary */}
-                <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-center">
+                <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-white/[0.03] rounded-xl border border-white/[0.06] text-center">
                   <div>
                     <div className="text-[10px] font-medium text-slate-400 uppercase">Billed</div>
                     <div className="text-xs font-bold text-sky-400 font-mono mt-0.5">
@@ -209,7 +216,7 @@ export const ClientsPage: React.FC = () => {
               </div>
 
               {/* Action Button */}
-              <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
                   Profit: <span className="text-emerald-400 font-bold font-mono">{formatCurrency(fin.netProfit, client.preferred_currency)}</span>
                 </span>
@@ -221,10 +228,11 @@ export const ClientsPage: React.FC = () => {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
+      )}
 
       {/* 9-Tab Client Profile Modal */}
       {selectedClient && (
@@ -236,7 +244,7 @@ export const ClientsPage: React.FC = () => {
         >
           <div className="space-y-6">
             {/* Top 9-Tab Bar */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-2 border-b border-slate-800 custom-scrollbar text-xs">
+            <div className="flex items-center gap-1 overflow-x-auto pb-2 border-b border-white/[0.06] custom-scrollbar text-xs">
               {[
                 { id: 'overview', label: '1. Overview & Financials' },
                 { id: 'projects', label: `2. Projects (${selectedClient.projects.length})` },
@@ -254,7 +262,7 @@ export const ClientsPage: React.FC = () => {
                   className={`px-3 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
                     activeTab === tab.id
                       ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                   }`}
                 >
                   {tab.label}
@@ -289,7 +297,7 @@ export const ClientsPage: React.FC = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/[0.03] p-5 rounded-2xl border border-white/[0.06]">
                   <div className="space-y-2 text-xs">
                     <h4 className="font-bold text-slate-200 uppercase text-[11px] tracking-wider">Company & Legal Information</h4>
                     <p className="text-slate-400">Company: <span className="text-slate-200 font-medium">{selectedClient.client.company_name || '—'}</span></p>
@@ -310,7 +318,7 @@ export const ClientsPage: React.FC = () => {
                 </div>
 
                 {/* Accounting Breakdown */}
-                <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400 space-y-1">
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-slate-400 space-y-1">
                   <span className="font-bold text-emerald-400">Interconnected Accounting Logic:</span>
                   <p>
                     Billable travel expenses ({formatCurrency(selectedClient.financials.billableExpenses)}) are passed through and recovered on invoices. Internal non-billable overheads ({formatCurrency(selectedClient.financials.nonBillableExpenses)}) and crew payouts ({formatCurrency(selectedClient.financials.teamCosts)}) deduct directly from gross revenue to yield the true net profit of {formatCurrency(selectedClient.financials.netProfit)}.
@@ -326,7 +334,7 @@ export const ClientsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 py-6 text-center">No projects registered for this client yet.</p>
                 ) : (
                   selectedClient.projects.map((p: any) => (
-                    <div key={p.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={p.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-bold text-white text-sm">{p.name}</div>
                         <div className="text-xs text-slate-400 mt-1 flex items-center gap-3">
@@ -339,9 +347,9 @@ export const ClientsPage: React.FC = () => {
                         <div className="font-mono font-bold text-emerald-400 text-sm">
                           {formatCurrency(p.agreed_amount, p.currency)}
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-1 inline-block">
+                        <Badge variant="success" className="mt-1">
                           {p.status}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
                   ))
@@ -356,14 +364,14 @@ export const ClientsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 py-6 text-center">No quotations recorded.</p>
                 ) : (
                   selectedClient.quotations.map((q: any) => (
-                    <div key={q.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={q.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-mono font-bold text-white text-xs">{q.quotation_number}</div>
                         <div className="text-xs text-slate-400 mt-0.5">Issued: {formatDate(q.issue_date)} | Valid: {formatDate(q.valid_until)}</div>
                       </div>
                       <div className="text-right">
                         <div className="font-mono font-bold text-white text-sm">{formatCurrency(q.total_amount, q.currency)}</div>
-                        <span className="text-[10px] text-amber-400 font-semibold">{q.status}</span>
+                        <Badge variant="warning">{q.status}</Badge>
                       </div>
                     </div>
                   ))
@@ -378,7 +386,7 @@ export const ClientsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 py-6 text-center">No invoices issued for this client.</p>
                 ) : (
                   selectedClient.invoices.map((inv: any) => (
-                    <div key={inv.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={inv.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-mono font-bold text-white text-xs">{inv.invoice_number}</div>
                         <div className="text-xs text-slate-400 mt-0.5">Date: {formatDate(inv.issue_date)} | Due: {formatDate(inv.due_date)}</div>
@@ -386,11 +394,9 @@ export const ClientsPage: React.FC = () => {
                       <div className="text-right">
                         <div className="font-mono font-bold text-white text-sm">{formatCurrency(inv.total_amount, inv.currency)}</div>
                         <div className="text-xs text-slate-400">Paid: {formatCurrency(inv.amount_paid, inv.currency)}</div>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                          inv.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                        }`}>
+                        <Badge variant={inv.status === 'Paid' ? 'success' : 'warning'}>
                           {inv.status}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
                   ))
@@ -405,7 +411,7 @@ export const ClientsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 py-6 text-center">No payments logged yet.</p>
                 ) : (
                   selectedClient.payments.map((pay: any) => (
-                    <div key={pay.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={pay.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-mono font-bold text-white text-xs">{pay.payment_number}</div>
                         <div className="text-xs text-slate-400 mt-0.5">
@@ -429,7 +435,7 @@ export const ClientsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 py-6 text-center">No travel expenses linked to this client.</p>
                 ) : (
                   selectedClient.travelExpenses.map((tr: any) => (
-                    <div key={tr.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={tr.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-bold text-white text-xs">{tr.category}: {tr.from_location} → {tr.to_location}</div>
                         <div className="text-xs text-slate-400 mt-0.5">
@@ -438,9 +444,9 @@ export const ClientsPage: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <div className="font-mono font-bold text-rose-400 text-sm">{formatCurrency(tr.amount, tr.currency)}</div>
-                        <span className="text-[10px] text-emerald-400 font-semibold">
+                        <Badge variant={tr.billing_treatment === 'Client_Billable' ? 'success' : 'neutral'}>
                           {tr.billing_treatment === 'Client_Billable' ? 'Client Billable' : 'Internal'}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
                   ))
@@ -455,7 +461,7 @@ export const ClientsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 py-6 text-center">No other expenses linked to this client.</p>
                 ) : (
                   selectedClient.otherExpenses.map((oe: any) => (
-                    <div key={oe.id} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div key={oe.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
                       <div>
                         <div className="font-bold text-white text-xs">{oe.category}</div>
                         <div className="text-xs text-slate-400 mt-0.5">{oe.description || '—'}</div>
@@ -470,7 +476,7 @@ export const ClientsPage: React.FC = () => {
             {/* TAB 8: DOCUMENTS & NOTES */}
             {activeTab === 'documents' && (
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <h4 className="font-bold text-white text-xs mb-2">Client Notes & Contract References</h4>
                   <p className="text-xs text-slate-300 whitespace-pre-wrap">{selectedClient.client.notes || 'No specialized notes attached.'}</p>
                 </div>
@@ -480,7 +486,7 @@ export const ClientsPage: React.FC = () => {
             {/* TAB 9: ACTIVITY HISTORY */}
             {activeTab === 'activity' && (
               <div className="space-y-3">
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-xs space-y-2">
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs space-y-2">
                   <div className="flex items-center gap-2 text-slate-400">
                     <Clock className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Client portfolio created on {formatDate(selectedClient.client.created_at)}</span>
@@ -510,68 +516,56 @@ export const ClientsPage: React.FC = () => {
         >
           <form onSubmit={handleCreateClient} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Client / Brand Name *</label>
-                <input
+              <Field label="Client / Brand Name *">
+                <Input
                   type="text"
                   required
                   placeholder="e.g. Royal Heritage Weddings"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Company Name (if applicable)</label>
-                <input
+              <Field label="Company Name (if applicable)">
+                <Input
                   type="text"
                   placeholder="e.g. Royal Heritage Event Management Pvt Ltd"
                   value={formData.company_name}
                   onChange={e => setFormData({ ...formData, company_name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Contact Person</label>
-                <input
+              <Field label="Contact Person">
+                <Input
                   type="text"
                   placeholder="e.g. Vikramaditya Rao"
                   value={formData.contact_person}
                   onChange={e => setFormData({ ...formData, contact_person: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Phone Number / WhatsApp</label>
-                <input
+              <Field label="Phone Number / WhatsApp">
+                <Input
                   type="text"
                   placeholder="+91 98765 43210"
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value, whatsapp: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Email Address</label>
-                <input
+              <Field label="Email Address">
+                <Input
                   type="email"
                   placeholder="client@domain.com"
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Client Type</label>
-                <select
+              <Field label="Client Type">
+                <Select
                   value={formData.client_type}
                   onChange={e => setFormData({ ...formData, client_type: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Wedding Planner">Wedding Planner</option>
                   <option value="Event Management Company">Event Management Company</option>
@@ -580,61 +574,46 @@ export const ClientsPage: React.FC = () => {
                   <option value="Corporate Client">Corporate Client</option>
                   <option value="Individual">Individual</option>
                   <option value="Other">Other</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">City / Base</label>
-                <input
+              <Field label="City / Base">
+                <Input
                   type="text"
                   placeholder="e.g. Bhilai, Raipur, Durg"
                   value={formData.city}
                   onChange={e => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-slate-400 mb-1 font-medium">Preferred Currency</label>
-                <select
+              <Field label="Preferred Currency">
+                <Select
                   value={formData.preferred_currency}
                   onChange={e => setFormData({ ...formData, preferred_currency: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="INR">INR (₹) - Indian Rupee</option>
                   <option value="USD">USD ($) - US Dollar</option>
                   <option value="AED">AED - UAE Dirham</option>
                   <option value="EUR">EUR (€) - Euro</option>
                   <option value="GBP">GBP (£) - British Pound</option>
-                </select>
-              </div>
+                </Select>
+              </Field>
             </div>
 
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Billing Address & GSTIN</label>
-              <textarea
+            <Field label="Billing Address & GSTIN">
+              <Textarea
                 rows={2}
                 placeholder="Address details, GSTIN number (if applicable)"
                 value={formData.billing_address}
                 onChange={e => setFormData({ ...formData, billing_address: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
+            </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-500/15 transition-all"
-              >
-                Save Client
-              </button>
+              </Button>
+              <Button type="submit">Save Client</Button>
             </div>
           </form>
         </Modal>
