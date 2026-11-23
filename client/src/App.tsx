@@ -1,7 +1,8 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Sidebar, navigationItems } from './components/Sidebar.js';
 import { Header } from './components/Header.js';
 import { Modal } from './components/Modal.js';
+import { ProductTourModal } from './components/ProductTourModal.js';
 import {
   Users,
   Film,
@@ -91,6 +92,19 @@ export function App() {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+
+  // Automatically show tour on first visit
+  useEffect(() => {
+    try {
+      const hasSeenTour = localStorage.getItem('fpv_tour_completed');
+      if (!hasSeenTour) {
+        setTourOpen(true);
+      }
+    } catch {
+      // ignore storage access errors
+    }
+  }, []);
 
   const getPageTitle = () => {
     const item = navigationItems.find(n => n.id === currentTab);
@@ -110,6 +124,7 @@ export function App() {
         setCurrentTab={setCurrentTab}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
+        onOpenTour={() => setTourOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -118,6 +133,7 @@ export function App() {
           title={getPageTitle()}
           onOpenSidebar={() => setSidebarOpen(true)}
           onQuickAdd={() => setQuickAddOpen(true)}
+          onOpenTour={() => setTourOpen(true)}
         />
 
         <main className="p-4 sm:p-6 lg:p-8 flex-1 max-w-7xl w-full mx-auto">
@@ -139,6 +155,13 @@ export function App() {
           </Suspense>
         </main>
       </div>
+
+      {/* Product Onboarding Tour & Calculation Guide Modal */}
+      <ProductTourModal
+        isOpen={tourOpen}
+        onClose={() => setTourOpen(false)}
+        onNavigateToTab={(tab) => setCurrentTab(tab)}
+      />
 
       {/* Global Quick Add Action Sheet */}
       {quickAddOpen && (

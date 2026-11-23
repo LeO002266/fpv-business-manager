@@ -15,7 +15,8 @@ import {
   Bell,
   Settings,
   X,
-  Camera
+  Camera,
+  Sparkles
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,6 +24,7 @@ interface SidebarProps {
   setCurrentTab: (tab: string) => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  onOpenTour?: () => void;
 }
 
 export interface NavItem {
@@ -76,7 +78,13 @@ const navGroups: NavGroup[] = [
 
 export const navigationItems = navGroups.flatMap((g) => g.items);
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentTab,
+  setCurrentTab,
+  isOpen,
+  setIsOpen,
+  onOpenTour,
+}) => {
   return (
     <>
       {/* Mobile Backdrop */}
@@ -161,8 +169,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, isO
           ))}
         </div>
 
-        {/* Bottom Business Card */}
-        <div className="p-3.5 border-t border-slate-200 bg-slate-50/50">
+        {/* Bottom Tour & Business Card */}
+        <div className="p-3.5 border-t border-slate-200 bg-slate-50/50 space-y-2">
+          {onOpenTour && (
+            <button
+              onClick={() => {
+                onOpenTour();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 transition-colors cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <span>How Features Work (Tour)</span>
+            </button>
+          )}
+
           <div className="flex items-center gap-3 p-2 rounded-lg bg-white border border-slate-200/80 shadow-xs">
             <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
               ₹

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Plus, Calendar, ShieldCheck } from 'lucide-react';
+import { Menu, Plus, Calendar, ShieldCheck, HelpCircle } from 'lucide-react';
 import { formatDate } from '../services/api.js';
 import { Button } from './ui/Button.js';
 
@@ -7,9 +7,15 @@ interface HeaderProps {
   title: string;
   onOpenSidebar: () => void;
   onQuickAdd: () => void;
+  onOpenTour: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, onOpenSidebar, onQuickAdd }) => {
+export const Header: React.FC<HeaderProps> = ({
+  title,
+  onOpenSidebar,
+  onQuickAdd,
+  onOpenTour,
+}) => {
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -26,7 +32,17 @@ export const Header: React.FC<HeaderProps> = ({ title, onOpenSidebar, onQuickAdd
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Quick Tour & Calculations Guide Button */}
+        <button
+          onClick={onOpenTour}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold cursor-pointer transition-colors shadow-2xs"
+          title="Learn how FPV Manager works and see calculation formulas"
+        >
+          <HelpCircle className="w-3.5 h-3.5 text-indigo-600" />
+          <span className="hidden sm:inline">Tour & Guide</span>
+        </button>
+
         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
           <Calendar className="w-3.5 h-3.5 text-indigo-600" />
           <span className="font-medium">{formatDate(today)}</span>
